@@ -1,16 +1,29 @@
-C:\Users\PcVip\Desktop\alejandría_-generador-de-cursos-con-ia (4)>vercel inspect alejandria-iwofql908-chalzskings-projects.vercel.app --logs
-Vercel CLI 44.4.1
-2025-07-22T16:06:00.209Z  Running build in Washington, D.C., USA (East) – iad1
-2025-07-22T16:06:00.210Z  Build machine configuration: 2 cores, 8 GB
-2025-07-22T16:06:00.240Z  Retrieving list of deployment files...
-2025-07-22T16:06:00.351Z  Previous build caches not available
-2025-07-22T16:06:00.598Z  Downloading 24 deployment files...
-2025-07-22T16:06:03.072Z  Running "vercel build"
-2025-07-22T16:06:03.559Z  Vercel CLI 44.5.0
-2025-07-22T16:06:04.185Z  Running "install" command: `echo 'Skipping install step since this project uses importmaps.'`...
-2025-07-22T16:06:04.189Z  Skipping install step since this project uses importmaps.
-2025-07-22T16:06:04.295Z  bash: vercel-build.sh: No such file or directory
-2025-07-22T16:06:04.298Z  Error: Command "bash vercel-build.sh" exited with 127
-2025-07-22T16:06:04.499Z
-2025-07-22T16:06:07.350Z  Exiting build container
-status  ● Error
+#!/bin/bash
+set -e
+
+echo "--- Starting Vercel Build Script ---"
+
+# 1. Crear el directorio de salida
+echo "[1/3] Creating public directory..."
+mkdir public
+
+# 2. Copiar todos los archivos necesarios
+echo "[2/3] Copying project files..."
+cp index.html public/
+cp index.tsx public/
+cp App.tsx public/
+cp types.ts public/
+cp metadata.json public/
+cp -r components public/
+cp -r hooks public/
+cp -r services public/
+echo "Files copied."
+
+# 3. Inyectar las variables de entorno
+echo "[3/3] Injecting environment variables..."
+# Reemplaza los marcadores de posición con los valores reales de las variables de Vercel
+sed -i "s|process.env.API_KEY|'$API_KEY'|g" public/services/geminiService.ts
+sed -i "s|process.env.VERCEL_PUBLIC_GOOGLE_CLIENT_ID|'$VERCEL_PUBLIC_GOOGLE_CLIENT_ID'|g" public/index.tsx
+sed -i "s|process.env.VERCEL_PUBLIC_GOOGLE_CLIENT_ID|'$VERCEL_PUBLIC_GOOGLE_CLIENT_ID'|g" public/components/LoginScreen.tsx
+sed -i "s|process.env.VERCEL_PUBLIC_GOOGLE_CLIENT_ID|'$VERCEL_PUBLIC_GOOGLE_CLIENT_ID'|g" public/components/Sidebar.tsx
+echo "--- Build process completed. ---"
