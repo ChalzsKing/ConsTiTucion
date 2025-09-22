@@ -1,6 +1,0 @@
-
-{
-  "installCommand": "echo 'Skipping install step since this project uses importmaps.'",
-  "buildCommand": "bash vercel-build.sh",
-  "outputDirectory": "public"
-}

@@ -1,6 +1,0 @@
-{
-  "name": "Alejandría: Generador de Cursos con IA",
-  "description": "Alejandría es una aplicación web que permite a los usuarios generar, visualizar y gestionar cursos personalizados utilizando la inteligencia artificial de Gemini. Los usuarios pueden crear cursos sobre cualquier tema, ver el contenido en un formato de diapositivas y gestionar su biblioteca de cursos.",
-  "requestFramePermissions": [],
-  "prompt": ""
-}
