@@ -1,0 +1,112 @@
+[
+  {
+    "id": 12,
+    "original_number": 1,
+    "question_text": "La Constitución se fundamenta",
+    "option_a": "En la unidad de la Nación Española.",
+    "option_b": "En el compromiso de unidad de todos los pueblos y nacionalidades integrantes de la Nación Española.",
+    "option_c": "En la indisoluble unidad de la Nación Española.",
+    "option_d": "En la pluralidad de pueblos integrantes de la Nación Española.",
+    "correct_answer": 2,
+    "created_at": "2025-09-20T18:36:02.3778"
+  },
+  {
+    "id": 13,
+    "original_number": 2,
+    "question_text": "Los valores superiores del ordenamiento jurídico propugnados desde nuestra Constitución son",
+    "option_a": "La libertad, la justicia, la igualdad y el pluralismo político.",
+    "option_b": "La libertad, la justicia y la libre competencia.",
+    "option_c": "La libertad, la igualdad y el pluralismo político y sindical.",
+    "option_d": "La libertad, la igualdad y la fraternidad.",
+    "correct_answer": 0,
+    "created_at": "2025-09-20T18:36:02.3778"
+  },
+  {
+    "id": 14,
+    "original_number": 3,
+    "question_text": "Sólo uno de los siguientes principios está garantizado constitucionalmente",
+    "option_a": "La responsabilidad e interdicción de la arbitrariedad de la Administración Pública, tanto nacional, como autonómica o local.",
+    "option_b": "La responsabilidad de la Administración Pública.",
+    "option_c": "La interdicción de la arbitrariedad del poder judicial.",
+    "option_d": "La responsabilidad e interdicción de la arbitrariedad de los poderes públicos.",
+    "correct_answer": 3,
+    "created_at": "2025-09-20T18:36:02.3778"
+  },
+  {
+    "id": 15,
+    "original_number": 4,
+    "question_text": "Una de las siguientes materias no es regulada en el Título Preliminar de la Constitución Española",
+    "option_a": "Las Cortes Generales.",
+    "option_b": "Las Asociaciones de Empresarios.",
+    "option_c": "Las Fuerzas Armadas.",
+    "option_d": "Los Partidos Políticos.",
+    "correct_answer": 0,
+    "created_at": "2025-09-20T18:36:02.3778"
+  },
+  {
+    "id": 16,
+    "original_number": 5,
+    "question_text": "Una de las siguientes afirmaciones referentes a las misiones de las Fuerzas Armadas, no es cierta",
+    "option_a": "Defienden el ordenamiento constitucional, impidiendo, por ejemplo, un golpe de estado antidemocrático.",
+    "option_b": "Defienden la integridad territorial del Estado, lo cual no es obstáculo para que consientan la independencia de alguna o algunas nacionalidades o regiones de España, tras decisión libremente adoptada al efecto en referéndum de autodeterminación.",
+    "option_c": "Garantizan la independencia de España, luchando, por ejemplo, contra la invasión militar de nuestro territorio por un ejército extranjero.",
+    "option_d": "Defienden la integridad territorial del Estado, no consintiendo, por ejemplo, la ruptura de la unidad de España.",
+    "correct_answer": 1,
+    "created_at": "2025-09-20T18:36:02.3778"
+  },
+  {
+    "id": 17,
+    "original_number": 6,
+    "question_text": "Las bases de la organización militar conforme a los principios constitucionales",
+    "option_a": "Se regulan en la propia Constitución, en el Título Octavo.",
+    "option_b": "Se regulan por Ley Ordinaria, conforme al mandato constitucional.",
+    "option_c": "Se regulan por Ley Orgánica, conforme al mandato constitucional.",
+    "option_d": "Se regulan en la propia Constitución, en el Título Preliminar.",
+    "correct_answer": 2,
+    "created_at": "2025-09-20T18:36:02.3778"
+  },
+  {
+    "id": 18,
+    "original_number": 7,
+    "question_text": "Las Fuerzas Armadas están constituidas por",
+    "option_a": "El Ejército de Tierra, con el apoyo logístico de la Armada y del Ejército del Aire.",
+    "option_b": "La Junta de Jefes de Estado Mayor.",
+    "option_c": "El Ejército de Tierra, la Armada y el Ejército del Aire.",
+    "option_d": "El Ejército de Tierra, la Armada, el Ejército del Aire, y el conjunto de cuerpos y fuerzas de Seguridad del Estado.",
+    "correct_answer": 2,
+    "created_at": "2025-09-20T18:36:02.3778"
+  },
+  {
+    "id": 19,
+    "original_number": 8,
+    "question_text": "Los sindicatos de trabajadores",
+    "option_a": "Contribuyen junto con las asociaciones de empresarios a la defensa y promoción de los intereses económicos y sociales que le son propios.",
+    "option_b": "Contribuyen en solitario a la promoción de los intereses sociales.",
+    "option_c": "Contribuyen a la defensa de sus exclusivos intereses económicos.",
+    "option_d": "Contribuyen junto a las asociaciones de empresarios a la defensa de los intereses sociales, pero no de naturaleza propia, sino general.",
+    "correct_answer": 0,
+    "created_at": "2025-09-20T18:36:02.3778"
+  },
+  {
+    "id": 20,
+    "original_number": 9,
+    "question_text": "Las demás lenguas de las respectivas Comunidades Autónomas",
+    "option_a": "Serán las únicas lenguas oficiales en las respectivas comunidades de acuerdo con sus Estatutos.",
+    "option_b": "Deben ser conocidas y empleadas por todos los españoles que residan o visiten la comunidad autónoma afectada.",
+    "option_c": "Serán también oficiales en las respectivas comunidades autónomas de acuerdo con sus Estatutos.",
+    "option_d": "Son oficiales también el resto del Estado.",
+    "correct_answer": 2,
+    "created_at": "2025-09-20T18:36:02.3778"
+  },
+  {
+    "id": 21,
+    "original_number": 0,
+    "question_text": "La forma política del Estado Español es",
+    "option_a": "El Parlamentarismo Bicameral.",
+    "option_b": "La Monarquía Parlamentaria.",
+    "option_c": "El Parlamentarismo Democrático.",
+    "option_d": "La Monarquía Institucional.",
+    "correct_answer": 0,
+    "created_at": "2025-09-20T18:36:02.3778"
+  }
+]
