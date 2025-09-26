@@ -4,37 +4,88 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, CheckCircle2, XCircle, ArrowRight, BookOpen } from "lucide-react"
+import { ArrowLeft, CheckCircle2, XCircle, ArrowRight, BookOpen, Clock, Target } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Article } from "@/lib/constitution-data"
 import { updateArticleProgress } from "@/lib/constitution-data"
 import { useSupabaseQuestions, type SupabaseQuestion } from "@/lib/hooks/useSupabaseQuestions"
+import { useUserProgress, formatStudyTime } from "@/lib/user-progress"
+import { getArticleNavigation, getArticleBreadcrumbs, type ArticleNavigation } from "@/lib/article-navigation"
+import { useArticleNavigationShortcuts, formatShortcutKey } from "@/lib/hooks/useKeyboardShortcuts"
 
 interface StudyFlowProps {
   article: Article
   onComplete: (success: boolean) => void
   onBack: () => void
+  onNavigateToArticle?: (articleNumber: number) => void
 }
 
 type StudyPhase = "reading" | "question" | "result"
 
-export function StudyFlow({ article, onComplete, onBack }: StudyFlowProps) {
+export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: StudyFlowProps) {
   const [phase, setPhase] = useState<StudyPhase>("reading")
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
+  const [startTime] = useState(Date.now())
+  const [studyTime, setStudyTime] = useState(0)
 
-  // Usar el hook de Supabase en lugar de datos estáticos
+  // Hooks
   const { question, loading, error } = useSupabaseQuestions(article.number)
+  const {
+    markArticleCompleted,
+    addStudyTime,
+    getArticleProgress,
+    initializeDailySession,
+    settings
+  } = useUserProgress()
+
+  // Inicializar sesión al montar el componente
+  useEffect(() => {
+    initializeDailySession()
+  }, [initializeDailySession])
+
+  // Timer para tracking del tiempo de estudio
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setStudyTime(Math.floor((Date.now() - startTime) / 1000))
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [startTime])
+
+  // Obtener progreso actual del artículo
+  const articleProgress = getArticleProgress(article.number)
+
+  // Obtener información de navegación
+  const navigation = getArticleNavigation(article.number)
+  const breadcrumbs = getArticleBreadcrumbs(article.number)
 
   const handleContinueToQuestion = () => {
+    // Guardar tiempo de lectura antes de continuar
+    addStudyTime(article.number, article.titleId, studyTime)
+
     if (question) {
       setPhase("question")
     } else {
-      // If no question available, mark as completed and update progress
+      // Si no hay pregunta, marcar como completado solo por lectura
+      markArticleCompleted(article.number, article.titleId, studyTime)
       updateArticleProgress(article.id, true, true)
       onComplete(true)
     }
   }
+
+  // Configurar keyboard shortcuts
+  const { shortcuts } = useArticleNavigationShortcuts({
+    onPrevious: navigation?.previous && onNavigateToArticle
+      ? () => onNavigateToArticle(navigation.previous!.number)
+      : undefined,
+    onNext: navigation?.next && onNavigateToArticle
+      ? () => onNavigateToArticle(navigation.next!.number)
+      : undefined,
+    onComplete: phase === "reading" ? handleContinueToQuestion : undefined,
+    onBack: onBack,
+    enabled: phase === "reading" // Solo activos en fase de lectura
+  })
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (selectedAnswer !== null) return // Prevent changing answer after selection
@@ -46,6 +97,9 @@ export function StudyFlow({ article, onComplete, onBack }: StudyFlowProps) {
 
     // Auto-advance after showing result
     setTimeout(() => {
+      // Marcar como completado con tiempo total de estudio
+      markArticleCompleted(article.number, article.titleId, studyTime)
+
       // Update article progress and unlock next article
       updateArticleProgress(article.id, true, correct || false)
       onComplete(correct || false)
@@ -62,17 +116,80 @@ export function StudyFlow({ article, onComplete, onBack }: StudyFlowProps) {
     return (
       <div className="min-h-screen bg-background p-6">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Volver al mapa
-            </Button>
-            <Badge variant="outline" className="gap-2">
-              <BookOpen className="w-4 h-4" />
-              Artículo {article.number}
-            </Badge>
+          {/* Breadcrumbs */}
+          <div className="mb-4">
+            <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+              {breadcrumbs.map((crumb, index) => (
+                <div key={crumb.id} className="flex items-center gap-2">
+                  {index > 0 && <span>/</span>}
+                  {crumb.href ? (
+                    <button className="hover:text-foreground transition-colors">
+                      {crumb.label}
+                    </button>
+                  ) : (
+                    <span className="text-foreground font-medium">{crumb.label}</span>
+                  )}
+                </div>
+              ))}
+            </nav>
           </div>
+
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Volver al mapa
+              </Button>
+              <Badge variant="outline" className="gap-2">
+                <BookOpen className="w-4 h-4" />
+                Artículo {article.number}
+              </Badge>
+              {articleProgress?.completed && (
+                <Badge variant="default" className="gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Completado
+                </Badge>
+              )}
+              {navigation && (
+                <Badge variant="secondary" className="gap-2">
+                  <Target className="w-4 h-4" />
+                  {navigation.titleProgress.currentIndex + 1} de {navigation.titleProgress.totalArticles}
+                </Badge>
+              )}
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Badge variant="secondary" className="gap-2">
+                <Clock className="w-4 h-4" />
+                {formatStudyTime(studyTime)}
+              </Badge>
+              {articleProgress && (
+                <Badge variant="outline" className="gap-2">
+                  <Target className="w-4 h-4" />
+                  {articleProgress.timesStudied} {articleProgress.timesStudied === 1 ? 'vez' : 'veces'}
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          {navigation && (
+            <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">{navigation.title.title}</span>
+                <span className="text-sm text-muted-foreground">
+                  {navigation.titleProgress.completionPercentage}% completado
+                </span>
+              </div>
+              <div className="w-full bg-background rounded-full h-2 border">
+                <div
+                  className="bg-primary rounded-full h-2 transition-all duration-300"
+                  style={{ width: `${navigation.titleProgress.completionPercentage}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
 
           {/* Reading Phase */}
           <Card className="shadow-lg">
@@ -91,14 +208,66 @@ export function StudyFlow({ article, onComplete, onBack }: StudyFlowProps) {
                 </div>
               </div>
 
-              <div className="text-center">
+              <div className="flex items-center justify-between">
+                {/* Navegación anterior */}
+                <div>
+                  {navigation?.previous && onNavigateToArticle ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => onNavigateToArticle(navigation.previous!.number)}
+                      className="gap-2"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      Art. {navigation.previous.number}
+                    </Button>
+                  ) : (
+                    <div className="w-24" /> // Spacer
+                  )}
+                </div>
+
+                {/* Botón principal */}
                 <Button size="lg" onClick={handleContinueToQuestion} className="px-8 py-3 text-lg">
-                  Continuar a la Pregunta
+                  {question ? "Continuar a pregunta" : "Marcar completado"}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
+
+                {/* Navegación siguiente */}
+                <div>
+                  {navigation?.next && onNavigateToArticle ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => onNavigateToArticle(navigation.next!.number)}
+                      className="gap-2"
+                    >
+                      Art. {navigation.next.number}
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  ) : (
+                    <div className="w-24" /> // Spacer
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* Keyboard Shortcuts Help */}
+          {shortcuts.length > 0 && (
+            <div className="mt-6 p-4 bg-muted/30 rounded-lg border border-muted">
+              <h3 className="text-sm font-semibold mb-3 text-muted-foreground">Atajos de teclado:</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                {shortcuts.map((shortcut, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <kbd className="px-2 py-1 text-xs bg-background rounded border">
+                      {formatShortcutKey(shortcut)}
+                    </kbd>
+                    <span className="text-xs text-muted-foreground ml-2 truncate">
+                      {shortcut.description.split(':')[1] || shortcut.description}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )

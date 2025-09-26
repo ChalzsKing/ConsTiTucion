@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { ChevronDown, ChevronRight, CheckCircle2, Lock, Play, Trophy, Target, ArrowRight, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { constitutionData, getTitleProgress, type Article } from "@/lib/constitution-data"
+import { generateTitleExam, type ExamQuestion } from "@/lib/exam-data"
 import {
   getSmartExpandedTitles,
   saveExpandedTitles,
@@ -18,9 +19,10 @@ import {
 
 interface ArticulosViewProps {
   onStartArticle?: (article: Article) => void
+  onStartExam?: (questions: ExamQuestion[], title: string) => void
 }
 
-export function ArticulosView({ onStartArticle }: ArticulosViewProps) {
+export function ArticulosView({ onStartArticle, onStartExam }: ArticulosViewProps) {
   const [expandedTitles, setExpandedTitles] = useState<string[]>([])
   const [showContinueCard, setShowContinueCard] = useState(false)
   const [continueInfo, setContinueInfo] = useState<any>(null)
@@ -108,6 +110,21 @@ export function ArticulosView({ onStartArticle }: ArticulosViewProps) {
   const dismissContinueCard = () => {
     setShowContinueCard(false)
     setContinueInfo(null)
+  }
+
+  const handleStartTitleExam = async (titleId: string, titleName: string) => {
+    if (!onStartExam) return
+
+    try {
+      const questions = await generateTitleExam(titleId, 10)
+      if (questions.length > 0) {
+        onStartExam(questions, `Examen: ${titleName}`)
+      } else {
+        console.warn(`No hay preguntas disponibles para el título: ${titleName}`)
+      }
+    } catch (error) {
+      console.error('Error al iniciar examen de título:', error)
+    }
   }
 
   return (
@@ -246,6 +263,7 @@ export function ArticulosView({ onStartArticle }: ArticulosViewProps) {
                         <Button
                           variant="outline"
                           className="border-accent text-accent hover:bg-accent hover:text-accent-foreground bg-transparent"
+                          onClick={() => handleStartTitleExam(title.id, title.title)}
                         >
                           Hacer Examen del Título
                         </Button>

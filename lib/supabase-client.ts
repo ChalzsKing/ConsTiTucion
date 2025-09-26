@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { frontendToSupabaseTitle } from './title-mapping'
 
 // Variables de entorno para el cliente (Next.js)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -9,6 +10,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Función auxiliar para convertir respuesta de letra a índice
+function convertAnswerToIndex(answer: string): number {
+  const answerMap: { [key: string]: number } = {
+    'a': 0,
+    'b': 1,
+    'c': 2,
+    'd': 3
+  }
+  return answerMap[answer?.toLowerCase()] || 0
+}
 
 export interface SupabaseQuestion {
   id: number
@@ -32,14 +44,20 @@ export interface ExamQuestion extends SupabaseQuestion {
 // Generar examen por artículo específico
 export async function generateArticleExam(articleNumber: number, questionCount = 1): Promise<ExamQuestion[]> {
   try {
+    console.log('Fetching questions for article:', articleNumber)
+
+    // Buscar preguntas que coincidan con el artículo:
+    // - Exacto: "32" para artículo 32
+    // - Con subdivisión: "32.1", "32.2" para artículo 32
+    const articleStr = articleNumber.toString()
+
+    const query = `mapped_article.eq.${articleStr},mapped_article.like.${articleStr}.%`
+
     const { data, error } = await supabase
-      .from('questions')
-      .select(`
-        *,
-        question_articles!inner(title_id, article_number)
-      `)
-      .eq('question_articles.article_number', articleNumber)
-      .limit(questionCount * 2) // Obtener más para randomizar
+      .from('Questions')
+      .select('*')
+      .or(query)
+      .limit(questionCount * 3) // Obtener más para randomizar
 
     if (error) {
       console.error('Error fetching questions:', error)
@@ -47,7 +65,6 @@ export async function generateArticleExam(articleNumber: number, questionCount =
     }
 
     if (!data || data.length === 0) {
-      console.log(`No se encontraron preguntas para el artículo ${articleNumber}`)
       return []
     }
 
@@ -58,11 +75,14 @@ export async function generateArticleExam(articleNumber: number, questionCount =
     return selected.map(question => ({
       ...question,
       articleNumber,
-      titleId: question.question_articles[0]?.title_id
+      titleId: question.title_id,
+      original_number: question.id, // Usar el ID como número original
+      correct_answer: convertAnswerToIndex(question.correct_answer)
     }))
 
   } catch (error) {
-    console.error('Error generating article exam:', error)
+    console.error('Error generating article exam for article', articleNumber, ':', error)
+    console.error('Error details:', JSON.stringify(error, null, 2))
     return []
   }
 }
@@ -70,13 +90,14 @@ export async function generateArticleExam(articleNumber: number, questionCount =
 // Generar examen por título constitucional
 export async function generateTitleExam(titleId: string, questionCount = 10): Promise<ExamQuestion[]> {
   try {
+    // Convertir el titleId del frontend al formato de Supabase
+    const supabaseTitleId = frontendToSupabaseTitle(titleId)
+    console.log(`Generating exam for title: ${titleId} -> ${supabaseTitleId}`)
+
     const { data, error } = await supabase
-      .from('questions')
-      .select(`
-        *,
-        question_articles!inner(title_id, article_number)
-      `)
-      .eq('question_articles.title_id', titleId)
+      .from('Questions')
+      .select('*')
+      .eq('title_id', supabaseTitleId)
       .limit(questionCount * 2)
 
     if (error) throw error
@@ -90,8 +111,10 @@ export async function generateTitleExam(titleId: string, questionCount = 10): Pr
 
     return selected.map(question => ({
       ...question,
-      titleId,
-      articleNumber: question.question_articles[0]?.article_number
+      titleId: question.title_id,
+      articleNumber: question.mapped_article ? parseInt(question.mapped_article) : undefined,
+      original_number: question.id,
+      correct_answer: convertAnswerToIndex(question.correct_answer)
     }))
 
   } catch (error) {
@@ -104,11 +127,8 @@ export async function generateTitleExam(titleId: string, questionCount = 10): Pr
 export async function generateGeneralExam(questionCount = 20): Promise<ExamQuestion[]> {
   try {
     const { data, error } = await supabase
-      .from('questions')
-      .select(`
-        *,
-        question_articles(title_id, article_number)
-      `)
+      .from('Questions')
+      .select('*')
       .limit(questionCount * 3) // Get more than needed to ensure randomness
 
     if (error) throw error
@@ -123,8 +143,10 @@ export async function generateGeneralExam(questionCount = 20): Promise<ExamQuest
 
     return selected.map(question => ({
       ...question,
-      titleId: question.question_articles[0]?.title_id,
-      articleNumber: question.question_articles[0]?.article_number
+      titleId: question.title_id,
+      articleNumber: question.mapped_article ? parseInt(question.mapped_article) : undefined,
+      original_number: question.id,
+      correct_answer: convertAnswerToIndex(question.correct_answer)
     }))
 
   } catch (error) {
@@ -136,34 +158,48 @@ export async function generateGeneralExam(questionCount = 20): Promise<ExamQuest
 // Obtener estadísticas de preguntas
 export async function getQuestionStatistics() {
   try {
-    const { data: totalQuestions, error: totalError } = await supabase
-      .from('questions')
-      .select('id', { count: 'exact' })
+    const { data, error } = await supabase
+      .from('Questions')
+      .select('id, title_id, mapped_article')
 
-    if (totalError) throw totalError
+    if (error) throw error
 
-    const { data: titleStats, error: titleError } = await supabase
-      .from('question_articles')
-      .select('title_id')
-
-    if (titleError) throw titleError
+    if (!data) {
+      return {
+        totalQuestions: 0,
+        questionsByTitle: {},
+        questionsByArticle: {}
+      }
+    }
 
     // Contar por título
     const byTitle: Record<string, number> = {}
-    titleStats?.forEach(item => {
-      byTitle[item.title_id] = (byTitle[item.title_id] || 0) + 1
+    const byArticle: Record<string, number> = {}
+
+    data.forEach(question => {
+      // Contar por título
+      if (question.title_id) {
+        byTitle[question.title_id] = (byTitle[question.title_id] || 0) + 1
+      }
+
+      // Contar por artículo (solo si tiene mapped_article)
+      if (question.mapped_article) {
+        byArticle[question.mapped_article] = (byArticle[question.mapped_article] || 0) + 1
+      }
     })
 
     return {
-      totalQuestions: totalQuestions?.length || 0,
-      questionsByTitle: byTitle
+      totalQuestions: data.length,
+      questionsByTitle: byTitle,
+      questionsByArticle: byArticle
     }
 
   } catch (error) {
     console.error('Error getting question statistics:', error)
     return {
       totalQuestions: 0,
-      questionsByTitle: {}
+      questionsByTitle: {},
+      questionsByArticle: {}
     }
   }
 }

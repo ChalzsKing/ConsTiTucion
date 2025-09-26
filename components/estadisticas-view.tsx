@@ -21,19 +21,21 @@ import {
 import { cn } from "@/lib/utils"
 import {
   mockUserStats,
-  generateArticleStats,
-  generateTitleStats,
   getMasteryColor,
   getMasteryLabel,
   getStreakMessage,
 } from "@/lib/statistics-data"
 import { useState } from "react"
+import { useRealStatistics, generateRealTitleStats, generateRealArticleStats } from "@/lib/hooks/useRealStatistics"
 
 export function EstadisticasView() {
   const [expandedTitles, setExpandedTitles] = useState<string[]>([])
+  const { statistics, loading, error } = useRealStatistics()
   const userStats = mockUserStats
-  const articleStats = generateArticleStats()
-  const titleStats = generateTitleStats()
+
+  // Generate real statistics based on Supabase data
+  const titleStats = generateRealTitleStats(statistics.questionsByTitle)
+  const articleStats = generateRealArticleStats(statistics.questionsByArticle)
 
   const toggleTitle = (titleId: string) => {
     setExpandedTitles((prev) => (prev.includes(titleId) ? prev.filter((id) => id !== titleId) : [...prev, titleId]))
@@ -48,6 +50,43 @@ export function EstadisticasView() {
     return `${mins}m`
   }
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto space-y-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Estadísticas</h1>
+          <p className="text-muted-foreground">Cargando estadísticas...</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="shadow-lg">
+              <CardContent className="p-6">
+                <div className="space-y-2">
+                  <div className="h-4 bg-muted rounded animate-pulse" />
+                  <div className="h-8 bg-muted rounded animate-pulse" />
+                  <div className="h-3 bg-muted rounded animate-pulse" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto space-y-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Estadísticas</h1>
+          <p className="text-muted-foreground text-red-500">Error cargando estadísticas: {error}</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8">
       {/* Header */}
@@ -56,6 +95,9 @@ export function EstadisticasView() {
         <p className="text-muted-foreground">
           Analiza tu progreso y descubre tus fortalezas y áreas de mejora en el estudio de la Constitución.
         </p>
+        <Badge variant="outline" className="mt-2">
+          {statistics.totalQuestions} preguntas disponibles
+        </Badge>
       </div>
 
       {/* Overview Cards */}

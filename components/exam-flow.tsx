@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { ArrowLeft, Clock, CheckCircle2, XCircle, Trophy, Target } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { ExamQuestion } from "@/lib/exam-data"
-import { calculateExamResult } from "@/lib/exam-data"
+import { calculateScore, saveExamResult } from "@/lib/exam-data"
 
 interface ExamFlowProps {
   questions: ExamQuestion[]
@@ -36,12 +36,27 @@ export function ExamFlow({ questions, examTitle, onComplete, onBack }: ExamFlowP
   const currentQuestion = examQuestions[currentQuestionIndex]
   const progress = ((currentQuestionIndex + 1) / examQuestions.length) * 100
 
+  // Safety check - if currentQuestion or options are not available, show loading
+  if (!currentQuestion || !currentQuestion.options || !Array.isArray(currentQuestion.options)) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="w-8 h-8 bg-primary rounded-full mx-auto mb-4"></div>
+              <p>Cargando pregunta...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const handleAnswerSelect = (answerIndex: number) => {
     const updatedQuestions = [...examQuestions]
     updatedQuestions[currentQuestionIndex] = {
       ...currentQuestion,
       userAnswer: answerIndex,
-      isCorrect: answerIndex === currentQuestion.correctAnswer,
     }
     setExamQuestions(updatedQuestions)
 
@@ -57,16 +72,53 @@ export function ExamFlow({ questions, examTitle, onComplete, onBack }: ExamFlowP
 
   const completeExam = (finalQuestions: ExamQuestion[]) => {
     setIsCompleted(true)
-    const results = calculateExamResult(finalQuestions)
+    const results = calculateScore(finalQuestions)
+
+    // Save exam result to localStorage
+    try {
+      const examResult = saveExamResult({
+        type: examTitle.includes("General") ? "general" : "title",
+        titleId: examTitle.includes("General") ? undefined : extractTitleId(examTitle),
+        questions: results.questionsWithResults,
+        score: results.score,
+        totalQuestions: results.questionsWithResults.length,
+        percentage: results.percentage,
+        timeSpent: timeElapsed
+      })
+      console.log('✅ Exam result saved:', examResult.id)
+    } catch (error) {
+      console.error('❌ Error saving exam result:', error)
+    }
 
     setTimeout(() => {
       onComplete({
         ...results,
-        questions: finalQuestions,
         timeSpent: timeElapsed,
         examTitle,
       })
     }, 2000)
+  }
+
+  // Helper function to extract title ID from exam title
+  const extractTitleId = (title: string): string | undefined => {
+    // Extract title ID from exam title like "Examen: Título III"
+    const match = title.match(/Título\s+(I{1,3}|IV|V|VI{1,3}|IX?|X)/i)
+    if (match) {
+      const romanToId: { [key: string]: string } = {
+        'I': 'titulo1',
+        'II': 'titulo2',
+        'III': 'titulo3',
+        'IV': 'titulo4',
+        'V': 'titulo5',
+        'VI': 'titulo6',
+        'VII': 'titulo7',
+        'VIII': 'titulo8',
+        'IX': 'titulo9',
+        'X': 'titulo10'
+      }
+      return romanToId[match[1].toUpperCase()]
+    }
+    return undefined
   }
 
   const formatTime = (seconds: number) => {
@@ -76,7 +128,7 @@ export function ExamFlow({ questions, examTitle, onComplete, onBack }: ExamFlowP
   }
 
   if (isCompleted) {
-    const results = calculateExamResult(examQuestions)
+    const results = calculateScore(examQuestions)
 
     return (
       <div className="min-h-screen bg-background p-6">

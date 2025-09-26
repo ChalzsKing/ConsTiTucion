@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { FileText, Play, Trophy, Target, BookOpen, Globe } from "lucide-react"
 import { constitutionData } from "@/lib/constitution-data"
 import { generateTitleExam, generateGeneralExam, type ExamQuestion } from "@/lib/exam-data"
+import { isTitleAvailable } from "@/lib/title-mapping"
 
 interface ExamenesViewProps {
   onStartExam?: (questions: ExamQuestion[], title: string) => void
@@ -100,8 +101,8 @@ export function ExamenesView({ onStartExam }: ExamenesViewProps) {
                 const completedArticles = title.articles.filter((a) => a.completed).length
                 const totalArticles = title.articles.length
                 const progress = Math.round((completedArticles / totalArticles) * 100)
-                // Check if this title has questions in Supabase (titles III-IX have mappings)
-                const hasQuestions = ["titulo-iii", "titulo-iv", "titulo-v", "titulo-vi", "titulo-vii", "titulo-viii", "titulo-ix"].includes(title.id)
+                // Check if this title has questions available using the mapping function
+                const hasQuestions = isTitleAvailable(title.id)
 
                 return (
                   <Card
