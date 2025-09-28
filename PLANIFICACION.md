@@ -15,17 +15,24 @@
 - [x] **🎯 SISTEMA DE CONSULTAS OPTIMIZADO** (artículos exactos y subdivisiones)
 - [x] **🎯 CONEXIÓN FUNCIONAL** con base de datos en producción
 
-### ⚠️ **EN PROGRESO** (Parcialmente implementado)
+### ✅ **COMPLETADO ADICIONAL** (Nuevos logros)
 - [x] ✅ **Flujo de estudio de artículos** (navegación completa, breadcrumbs, shortcuts)
 - [x] ✅ **Sistema de exámenes** (completo con puntuación y persistencia)
-- [ ] **Estadísticas y métricas** (componente básico, sin datos reales integrados)
+- [x] ✅ **Exámenes por título** (8 títulos disponibles con mapeo completo)
+- [x] ✅ **Persistencia de progreso usuario** (localStorage + Supabase sync)
+- [x] ✅ **🎯 SISTEMA DE AUTENTICACIÓN COMPLETO** (Google OAuth + Email/Password)
+- [x] ✅ **🎯 POLÍTICAS RLS AJUSTADAS** (Acceso público a preguntas, usuarios autenticados)
+- [x] ✅ **🎯 PERFILES DE USUARIO** (Gestión completa de datos personales)
+- [x] ✅ **🎯 RUTAS PROTEGIDAS** (Middleware automático de autenticación)
+
+### ⚠️ **EN PROGRESO** (Implementación parcial)
+- [ ] **Estadísticas y métricas avanzadas** (falta tabla user_statistics en Supabase)
 
 ### ❌ **PENDIENTE** (Por implementar)
-- [x] ✅ **Persistencia de progreso usuario** (localStorage + Supabase sync)
-- [ ] **Sistema de autenticación completo**
+- [ ] **Sistema freemium y límites de uso**
 - [ ] **Gamificación y logros**
 - [ ] **Marketing y SEO**
-- [ ] **Monetización**
+- [ ] **Monetización con Stripe**
 
 ---
 
@@ -41,7 +48,7 @@
 - [x] ✅ **1.1** Implementar función `calculateScore(answers)` → Calcular puntuación sobre respuestas
 - [x] ✅ **1.2** Crear componente `ExamResults` → Pantalla de resultados con puntuación
 - [x] ✅ **1.3** Añadir revisión de respuestas → Mostrar correctas/incorrectas con explicaciones
-- [x] ✅ **1.4** Implementar exámenes de título → Sistema completo de exámenes por títulos específicos
+- [x] ✅ **1.4** Implementar exámenes de título → Sistema completo con 8 títulos disponibles (titulo1-titulo8)
 - [x] ✅ **1.5** Función `saveExamResult()` → Guardar resultado en localStorage con sistema completo de persistencia
 - [x] ✅ **1.6** Navegación post-examen → Botones "Repetir" / "Nuevo examen" / "Estudiar errores"
 
@@ -85,35 +92,40 @@
 **Prioridad**: MEDIA-ALTA
 
 **Acciones requeridas**: **10 tareas**
-- [ ] **4.1** Configurar Supabase Auth → Enable email auth en dashboard
-- [ ] **4.2** Crear `AuthContext` → React context para gestión de usuario global
-- [ ] **4.3** Componente `LoginForm` → Form de inicio de sesión con validación
-- [ ] **4.4** Componente `RegisterForm` → Form de registro con confirmación email
-- [ ] **4.5** Componente `PasswordReset` → Recuperar contraseña vía email
-- [ ] **4.6** Protected routes → HOC/middleware para rutas que requieren login
-- [ ] **4.7** Componente `UserProfile` → Mostrar/editar nombre, avatar, preferencias
-- [ ] **4.8** Auth middleware → Verificar JWT token en todas las requests
-- [ ] **4.9** Social auth Google → OAuth integration con Google Sign-In
-- [ ] **4.10** Logout functionality → Cerrar sesión y limpiar estado
+- [x] ✅ **4.1** Configurar Supabase Auth → Enable email auth en dashboard
+- [x] ✅ **4.2** Crear `AuthContext` → React context para gestión de usuario global
+- [x] ✅ **4.3** Componente `LoginForm` → Form de inicio de sesión con validación
+- [x] ✅ **4.4** Componente `RegisterForm` → Form de registro con confirmación email
+- [x] ✅ **4.5** Componente `PasswordReset` → Recuperar contraseña vía email
+- [x] ✅ **4.6** Protected routes → HOC/middleware para rutas que requieren login
+- [x] ✅ **4.7** Componente `UserProfile` → Mostrar/editar nombre, avatar, preferencias
+- [x] ✅ **4.8** Auth middleware → Verificar JWT token en todas las requests
+- [x] ✅ **4.9** Social auth Google → OAuth integration con Google Sign-In
+- [x] ✅ **4.10** Logout functionality → Cerrar sesión y limpiar estado
 
-**Progreso**: 0/10 = 0% ❌
+**Progreso**: 10/10 = 100% ✅ **¡HITO COMPLETADO!**
 
 ---
 
 ### **HITO 5: ESTADÍSTICAS PERSONALES** 📊
 **Meta**: Usuario ve gráficos detallados de progreso y rendimiento
-**Prioridad**: MEDIA
+**Prioridad**: ALTA (requerido para eliminar errores actuales)
 
-**Acciones requeridas**: **7 tareas**
-- [ ] **5.1** Crear tabla `statistics` → Schema para métricas de usuario
-- [ ] **5.2** Hook `useStatistics` → Obtener y procesar datos del usuario
-- [ ] **5.3** Gráfico de progreso temporal → Chart.js con progreso por días/semanas
-- [ ] **5.4** Métricas por título constitucional → Rendimiento por sección con colores
-- [ ] **5.5** Histórico de exámenes → Lista/tabla de resultados pasados
-- [ ] **5.6** Tracking tiempo de estudio → Cronómetro por artículo y total
-- [ ] **5.7** Export de datos → Botones descarga CSV/PDF con estadísticas
+**⚠️ PROBLEMA ACTUAL**: Error `user_statistics table not found` impide sync completo
 
-**Progreso**: 0/7 = 0% ❌
+**Acciones requeridas**: **10 tareas**
+- [ ] **5.1** Crear tabla `user_statistics` en Supabase → Schema para métricas de usuario
+- [ ] **5.2** Crear tabla `exam_history` → Historial completo de exámenes realizados
+- [ ] **5.3** Configurar políticas RLS para nuevas tablas → Acceso seguro por usuario
+- [ ] **5.4** Hook `useStatistics` → Obtener y procesar datos del usuario autenticado
+- [ ] **5.5** Componente `StatsDashboard` → Panel principal con métricas clave
+- [ ] **5.6** Gráfico de progreso temporal → Chart.js con progreso por días/semanas
+- [ ] **5.7** Métricas por título constitucional → Rendimiento por sección con colores
+- [ ] **5.8** Histórico de exámenes → Lista/tabla de resultados pasados con filtros
+- [ ] **5.9** Tracking tiempo de estudio → Cronómetro por artículo y total
+- [ ] **5.10** Export de datos → Botones descarga CSV/PDF con estadísticas
+
+**Progreso**: 0/10 = 0% ❌
 
 ---
 
@@ -198,16 +210,16 @@
 ## 📊 **RESUMEN EJECUTIVO**
 
 ### **Progreso Total**
-- ✅ **Tareas completadas**: 23
-- ⏳ **Tareas pendientes**: 62
-- 📈 **Progreso general**: **27%**
+- ✅ **Tareas completadas**: 34
+- ⏳ **Tareas pendientes**: 51
+- 📈 **Progreso general**: **40%**
 
 ### **Distribución por Hito**
 1. **Exámenes Funcionales**: 100% (8/8) ✅ **¡COMPLETADO!**
 2. **Persistencia Datos**: 100% (6/6) ✅ **¡COMPLETADO!**
 3. **Navegación Fluida**: 100% (5/5) ✅ **¡COMPLETADO!**
-4. **Autenticación**: 0% (0/10)
-5. **Estadísticas**: 0% (0/7)
+4. **Autenticación**: 100% (10/10) ✅ **¡COMPLETADO!**
+5. **Estadísticas**: 0% (0/10)
 6. **Gamificación**: 0% (0/8)
 7. **Marketing/SEO**: 0% (0/12)
 8. **Monetización**: 0% (0/8)
@@ -240,7 +252,19 @@
 4. ~~**Acción 3.4**: Auto-marcar completado~~ ✅ COMPLETADA
 5. ~~**Acción 3.5**: Keyboard shortcuts~~ ✅ COMPLETADA
 
-### **🚀 Próximo HITO: HITO 4 - Autenticación Completa** (0/10 acciones):
+### **🎉 HITO 4 COMPLETADO** (10/10 acciones):
+1. ~~**Acción 4.1**: Configurar Supabase Auth~~ ✅ COMPLETADA
+2. ~~**Acción 4.2**: Crear `AuthContext`~~ ✅ COMPLETADA
+3. ~~**Acción 4.3**: Componente `LoginForm`~~ ✅ COMPLETADA
+4. ~~**Acción 4.4**: Componente `RegisterForm`~~ ✅ COMPLETADA
+5. ~~**Acción 4.5**: Componente `PasswordReset`~~ ✅ COMPLETADA
+6. ~~**Acción 4.6**: Protected routes~~ ✅ COMPLETADA
+7. ~~**Acción 4.7**: Componente `UserProfile`~~ ✅ COMPLETADA
+8. ~~**Acción 4.8**: Auth middleware~~ ✅ COMPLETADA
+9. ~~**Acción 4.9**: Social auth Google~~ ✅ COMPLETADA
+10. ~~**Acción 4.10**: Logout functionality~~ ✅ COMPLETADA
+
+### **🚀 Próximo HITO: HITO 5 - Estadísticas Personales** (0/10 acciones):
 
 ### **Criterio de Éxito por Acción**
 - ✅ **Acción completada** = Funcionalidad testeada y funcionando
@@ -291,16 +315,27 @@ statistics (user_id, date, articles_studied, exam_scores)
 - **Dominio**: $1/mes
 - **Total base**: ~$75/mes
 
-### **Modelo de Monetización**
-- **Plan Free**: Límites básicos
-- **Plan Pro**: $9.99/mes - Sin límites + features premium
-- **Plan Anual**: $99/año (2 meses gratis)
-- **Certificados**: $19.99 cada uno
+### **Modelo de Monetización - FREEMIUM**
+- **Plan Free**:
+  - ✅ Acceso completo a contenido constitucional (artículos 1-169)
+  - ✅ Sistema de estudio con navegación y progreso ilimitado
+  - ⚠️ **Límites de exámenes**:
+    - 5 rondas de examen por mes
+    - 1 examen por título (máximo 8 exámenes por título)
+    - 1 examen general por mes
+  - ⚠️ Sin estadísticas avanzadas ni exportación de datos
+- **Plan Pro**: €4.99/mes
+  - ✅ **Exámenes completamente ilimitados** (sin restricciones)
+  - ✅ Estadísticas detalladas y gráficos avanzados
+  - ✅ Exportación de datos (CSV/PDF)
+  - ✅ Historial completo de exámenes
+  - ✅ Gamificación completa (badges, logros, rankings)
+- **Plan Anual**: €49.99/año (2 meses gratis)
 
 ### **Proyección de Ingresos**
-- **100 usuarios Pro**: $999/mes
-- **500 usuarios Pro**: $4,995/mes
-- **1000 usuarios Pro**: $9,990/mes
+- **100 usuarios Pro**: €499/mes
+- **500 usuarios Pro**: €2,495/mes
+- **1000 usuarios Pro**: €4,990/mes
 
 ---
 
@@ -323,9 +358,28 @@ statistics (user_id, date, articles_studied, exam_scores)
 
 ---
 
-**Última actualización**: 2025-09-24
-**Estado actual**: ✅ 3 de 9 hitos completados (33%)
-**Próxima revisión**: Tras completar HITO 4
+**Última actualización**: 2025-09-27
+**Estado actual**: ✅ 4 de 9 hitos completados (44%) - Sistema de autenticación Google OAuth completado
+**Próxima revisión**: Tras completar HITO 5 (Estadísticas)
+
+### 🎉 **LOGROS RECIENTES**
+
+#### **HITO 4 - Autenticación Completa** (2025-09-27)
+- ✅ **Sistema de autenticación completo con Google OAuth**
+- ✅ **AuthContext con React hooks** para gestión global de usuario
+- ✅ **Componentes completos**: LoginForm, RegisterForm, PasswordReset, UserProfile
+- ✅ **Middleware de autenticación** con @supabase/ssr
+- ✅ **Rutas protegidas** automáticas (/profile, /dashboard, /admin)
+- ✅ **Políticas RLS ajustadas** - Acceso público a preguntas, autenticación para perfiles
+- ✅ **Integración Google Cloud Console** - OAuth configurado y funcional
+
+#### **HITO 1-3 - Sistema Base** (2025-09-26)
+- ✅ **Sistema de exámenes por título completamente funcional**
+- ✅ **8 títulos constitucionales disponibles** (Título I al VIII)
+- ✅ **Mapeo automatizado** entre frontend y Supabase
+- ✅ **1000 preguntas integradas** y funcionando
+- ✅ **Interfaz actualizada** que muestra títulos disponibles dinámicamente
+- ✅ **Navegación fluida y persistencia de datos** completamente implementada
 
 ---
 

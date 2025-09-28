@@ -16,6 +16,7 @@ import { clearStudyPosition } from "@/lib/navigation-state"
 import { useUserProgress } from "@/lib/user-progress"
 import { useOnlineSync } from "@/lib/hooks/useOnlineStatus"
 import { useSupabaseSync } from "@/lib/supabase-sync"
+import { AuthProvider } from "@/lib/auth/auth-context"
 
 type AppState = "main" | "studying" | "exam" | "exam-results"
 
@@ -217,9 +218,11 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-      <main className="flex-1 overflow-auto">{renderContent()}</main>
-    </div>
+    <AuthProvider>
+      <div className="flex h-screen bg-background">
+        <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+        <main className="flex-1 overflow-auto">{renderContent()}</main>
+      </div>
+    </AuthProvider>
   )
 }
