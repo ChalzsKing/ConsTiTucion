@@ -9,6 +9,7 @@ import { ArrowLeft, Clock, CheckCircle2, XCircle, Trophy, Target } from "lucide-
 import { cn } from "@/lib/utils"
 import type { ExamQuestion } from "@/lib/exam-data"
 import { calculateScore, saveExamResult } from "@/lib/exam-data"
+import { useStatistics } from "@/lib/hooks/useStatistics"
 
 interface ExamFlowProps {
   questions: ExamQuestion[]
@@ -23,6 +24,7 @@ export function ExamFlow({ questions, examTitle, onComplete, onBack }: ExamFlowP
   const [startTime] = useState(Date.now())
   const [timeElapsed, setTimeElapsed] = useState(0)
   const [isCompleted, setIsCompleted] = useState(false)
+  const { saveExamResult: saveToSupabase } = useStatistics()
 
   // Timer effect
   useEffect(() => {
@@ -70,7 +72,7 @@ export function ExamFlow({ questions, examTitle, onComplete, onBack }: ExamFlowP
     }, 1000)
   }
 
-  const completeExam = (finalQuestions: ExamQuestion[]) => {
+  const completeExam = async (finalQuestions: ExamQuestion[]) => {
     setIsCompleted(true)
     const results = calculateScore(finalQuestions)
 
@@ -85,9 +87,27 @@ export function ExamFlow({ questions, examTitle, onComplete, onBack }: ExamFlowP
         percentage: results.percentage,
         timeSpent: timeElapsed
       })
-      console.log('✅ Exam result saved:', examResult.id)
+      console.log('✅ Exam result saved to localStorage:', examResult.id)
     } catch (error) {
-      console.error('❌ Error saving exam result:', error)
+      console.error('❌ Error saving exam result to localStorage:', error)
+    }
+
+    // Also save to Supabase for statistics
+    try {
+      await saveToSupabase({
+        exam_type: examTitle.includes("General") ? "general" : "title",
+        exam_identifier: examTitle.includes("General") ? "general" : extractTitleId(examTitle),
+        title_name: examTitle,
+        total_questions: results.questionsWithResults.length,
+        correct_answers: results.score,
+        incorrect_answers: results.questionsWithResults.length - results.score,
+        score_percentage: results.percentage,
+        time_taken_seconds: timeElapsed,
+        questions_data: results.questionsWithResults
+      })
+      console.log('✅ Exam result saved to Supabase')
+    } catch (error) {
+      console.error('❌ Error saving exam result to Supabase:', error)
     }
 
     setTimeout(() => {

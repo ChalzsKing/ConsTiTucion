@@ -28,20 +28,20 @@ export const constitutionData: ConstitutionTitle[] = [
         number: 1,
         title: "Estado social y democrático de Derecho",
         content: "1. España se constituye en un Estado social y democrático de Derecho, que propugna como valores superiores de su ordenamiento jurídico la libertad, la justicia, la igualdad y el pluralismo político.\n\n2. La soberanía nacional reside en el pueblo español, del que emanan los poderes del Estado.\n\n3. La forma política del Estado español es la Monarquía parlamentaria.",
-        completed: true,
+        completed: false,
         available: true,
-        attempts: 3,
-        correctAnswers: 2,
+        attempts: 0,
+        correctAnswers: 0,
       },
       {
         id: 2,
         number: 2,
         title: "Unidad de España y autonomías",
         content: "La Constitución se fundamenta en la indisoluble unidad de la Nación española, patria común e indivisible de todos los españoles, y reconoce y garantiza el derecho a la autonomía de las nacionalidades y regiones que la integran y la solidaridad entre todas ellas.",
-        completed: true,
+        completed: false,
         available: true,
-        attempts: 2,
-        correctAnswers: 2,
+        attempts: 0,
+        correctAnswers: 0,
       },
       {
         id: 3,
@@ -1876,13 +1876,42 @@ export const constitutionData: ConstitutionTitle[] = [
 ]
 
 export function getOverallProgress() {
-  const allArticles = constitutionData.flatMap((title) => title.articles)
-  const completed = allArticles.filter((article) => article.completed).length
-  const total = allArticles.length
+  // Solo en el cliente, obtener progreso real del usuario
+  if (typeof window === 'undefined') {
+    // Renderizado del servidor: devolver datos consistentes
+    const total = constitutionData.flatMap((title) => title.articles).length
+    return {
+      completed: 0,
+      total,
+      percentage: 0,
+    }
+  }
+
+  // Renderizado del cliente: leer localStorage
+  const storedProgress = localStorage.getItem('constimaster-user-progress')
+
+  if (storedProgress) {
+    try {
+      const userProgress = JSON.parse(storedProgress)
+      const completed = Object.keys(userProgress.articles || {}).length
+      const total = constitutionData.flatMap((title) => title.articles).length
+
+      return {
+        completed,
+        total,
+        percentage: Math.round((completed / total) * 100),
+      }
+    } catch (error) {
+      console.warn('Error parsing user progress:', error)
+    }
+  }
+
+  // Cliente sin datos: comenzar desde cero
+  const total = constitutionData.flatMap((title) => title.articles).length
   return {
-    completed,
+    completed: 0,
     total,
-    percentage: Math.round((completed / total) * 100),
+    percentage: 0,
   }
 }
 
@@ -1890,8 +1919,35 @@ export function getTitleProgress(titleId: string) {
   const title = constitutionData.find((t) => t.id === titleId)
   if (!title) return { completed: 0, total: 0, percentage: 0 }
 
-  const completed = title.articles.filter((article) => article.completed).length
+  // Solo en el cliente, obtener progreso real del usuario
+  if (typeof window === 'undefined') {
+    // Renderizado del servidor: devolver datos consistentes
+    return {
+      completed: 0,
+      total: title.articles.length,
+      percentage: 0,
+    }
+  }
+
+  // Renderizado del cliente: leer localStorage
+  const storedProgress = localStorage.getItem('constimaster-user-progress')
+  let userProgressArticles: { [key: number]: any } = {}
+
+  if (storedProgress) {
+    try {
+      const userProgress = JSON.parse(storedProgress)
+      userProgressArticles = userProgress.articles || {}
+    } catch (error) {
+      console.warn('Error parsing user progress:', error)
+    }
+  }
+
+  // Contar artículos completados desde localStorage
+  const completed = title.articles.filter(article =>
+    userProgressArticles[article.number]?.completed === true
+  ).length
   const total = title.articles.length
+
   return {
     completed,
     total,
@@ -1899,26 +1955,30 @@ export function getTitleProgress(titleId: string) {
   }
 }
 
+// DEPRECATED: Esta función modifica directamente constitutionData en memoria
+// En producción, el progreso debe gestionarse únicamente através de useUserProgress
+// Mantenida temporalmente para compatibilidad con componentes existentes
 export function updateArticleProgress(articleId: number, completed: boolean, success: boolean) {
+  console.warn('⚠️ updateArticleProgress está deprecada. Usar useUserProgress en su lugar.')
+
   const allArticles = constitutionData.flatMap((title) => title.articles)
   const article = allArticles.find((a) => a.id === articleId)
 
   if (article) {
-    article.attempts += 1
-    if (success) {
-      article.correctAnswers += 1
-    }
+    // No modificar datos en memoria para producción
+    // article.attempts += 1
+    // if (success) {
+    //   article.correctAnswers += 1
+    // }
+    // if (completed && success) {
+    //   article.completed = true
+    //   unlockNextArticle(articleId)
+    // }
 
-    if (completed && success) {
-      article.completed = true
-      // Unlock next article
-      unlockNextArticle(articleId)
-    }
-
-    // Save to localStorage
+    // Solo guardar en localStorage a través del sistema de persistencia
     if (typeof window !== "undefined") {
       import("./storage").then(({ updateArticleInStorage }) => {
-        updateArticleInStorage(articleId, article.completed, article.attempts, article.correctAnswers)
+        updateArticleInStorage(articleId, completed, 0, 0)
       })
     }
   }

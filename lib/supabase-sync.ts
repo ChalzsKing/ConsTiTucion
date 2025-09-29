@@ -3,6 +3,7 @@
 import { supabase } from './supabase-client'
 import type { UserProgress, ArticleProgress } from './user-progress'
 import { defaultUserProgress } from './user-progress'
+import { getArticleTitleId } from './article-title-mapping'
 
 // Tipos para Supabase
 export interface SupabaseUserProgress {
@@ -22,9 +23,10 @@ export interface SupabaseUserProgress {
 export interface SupabaseUserStatistics {
   id: string
   user_id: string
-  total_study_time: number
+  total_study_time_minutes: number
   total_articles_studied: number
-  study_streak: number
+  current_streak_days: number
+  max_streak_days: number
   last_study_date: string | null
   created_at: string
   updated_at: string
@@ -120,9 +122,9 @@ export class SupabaseSync {
       // Convertir y guardar en localStorage
       const progress: UserProgress = {
         articles: articlesData,
-        totalStudyTime: statisticsData?.total_study_time || 0,
+        totalStudyTime: (statisticsData?.total_study_time_minutes || 0) * 60, // Convertir minutos a segundos
         totalArticlesStudied: statisticsData?.total_articles_studied || 0,
-        studyStreak: statisticsData?.study_streak || 0,
+        studyStreak: statisticsData?.current_streak_days || 0,
         lastStudyDate: statisticsData?.last_study_date ? new Date(statisticsData.last_study_date) : undefined,
         settings: {
           autoMarkCompleted: settingsData?.auto_mark_completed ?? defaultUserProgress.settings.autoMarkCompleted,
@@ -159,7 +161,11 @@ export class SupabaseSync {
       }
 
       // Comparar timestamps para decidir dirección de sync
-      const localLastUpdate = localProgress.lastStudyDate?.getTime() || 0
+      const localLastUpdate = localProgress.lastStudyDate
+        ? (typeof localProgress.lastStudyDate === 'string'
+          ? new Date(localProgress.lastStudyDate).getTime()
+          : localProgress.lastStudyDate.getTime ? localProgress.lastStudyDate.getTime() : 0)
+        : 0
       const remoteLastUpdate = remoteStatistics.last_study_date ?
         new Date(remoteStatistics.last_study_date).getTime() : 0
 
@@ -193,17 +199,30 @@ export class SupabaseSync {
     const articleArray = Object.values(articles)
 
     for (const article of articleArray) {
+      // Convertir fechas de manera segura
+      const completedAt = article.completedAt
+        ? (typeof article.completedAt === 'string' ? article.completedAt : new Date(article.completedAt).toISOString())
+        : null
+
+      const lastStudiedAt = article.lastStudiedAt
+        ? (typeof article.lastStudiedAt === 'string' ? article.lastStudiedAt : new Date(article.lastStudiedAt).toISOString())
+        : new Date().toISOString()
+
+      // Asegurar que title_id nunca sea null
+      const titleId = article.titleId || getArticleTitleId(article.articleNumber)
+
       const { error } = await supabase
         .from('user_progress')
         .upsert({
           user_id: this.userId,
           article_number: article.articleNumber,
-          title_id: article.titleId,
-          completed: article.completed,
-          completed_at: article.completedAt?.toISOString(),
-          study_time_seconds: article.studyTimeSeconds,
-          times_studied: article.timesStudied,
-          last_studied_at: article.lastStudiedAt?.toISOString()
+          title_id: titleId,
+          is_completed: article.completed,
+          completed_at: completedAt,
+          total_study_time_seconds: article.studyTimeSeconds || 0,
+          times_studied: article.timesStudied || 1,
+          last_studied_at: lastStudiedAt,
+          first_studied_at: lastStudiedAt // Usar la misma fecha si no existe
         }, {
           onConflict: 'user_id,article_number'
         })
@@ -217,10 +236,15 @@ export class SupabaseSync {
       .from('user_statistics')
       .upsert({
         user_id: this.userId,
-        total_study_time: progress.totalStudyTime,
+        total_study_time_minutes: Math.floor(progress.totalStudyTime / 60), // Convertir segundos a minutos
         total_articles_studied: progress.totalArticlesStudied,
-        study_streak: progress.studyStreak,
-        last_study_date: progress.lastStudyDate?.toISOString().split('T')[0] // Solo la fecha
+        current_streak_days: progress.studyStreak,
+        max_streak_days: Math.max(progress.studyStreak, 1), // Al menos 1 si hay progreso
+        last_study_date: progress.lastStudyDate
+          ? (typeof progress.lastStudyDate === 'string'
+            ? progress.lastStudyDate.split('T')[0]
+            : progress.lastStudyDate.toISOString ? progress.lastStudyDate.toISOString().split('T')[0] : null)
+          : null
       }, {
         onConflict: 'user_id'
       })

@@ -1,4 +1,5 @@
 "use client"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { BookOpen, FileText, BarChart3, User, Shield, CheckCircle2 } from "lucide-react"
@@ -11,6 +12,9 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
+  const [progress, setProgress] = useState({ completed: 0, total: 182, percentage: 0 })
+  const [isHydrated, setIsHydrated] = useState(false)
+
   const menuItems = [
     {
       id: "articulos",
@@ -38,7 +42,11 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
     },
   ]
 
-  const progress = getOverallProgress()
+  // Actualizar progreso después de la hidratación
+  useEffect(() => {
+    setIsHydrated(true)
+    setProgress(getOverallProgress())
+  }, [])
 
   return (
     <div className="w-64 h-screen bg-sidebar border-r border-sidebar-border flex flex-col">

@@ -161,12 +161,32 @@ export function getOverallProgress(): {
     percentage: number
   }>
 } {
+  // Solo en el cliente, obtener progreso real del usuario
+  let userProgressArticles: { [key: number]: any } = {}
+
+  if (typeof window !== 'undefined') {
+    // Renderizado del cliente: leer localStorage
+    const storedProgress = localStorage.getItem('constimaster-user-progress')
+
+    if (storedProgress) {
+      try {
+        const userProgress = JSON.parse(storedProgress)
+        userProgressArticles = userProgress.articles || {}
+      } catch (error) {
+        console.warn('Error parsing user progress:', error)
+      }
+    }
+  }
+
   let totalArticles = 0
   let totalCompleted = 0
   const titleProgress = []
 
   for (const title of constitutionData) {
-    const titleCompleted = title.articles.filter(article => article.completed).length
+    // Contar artículos completados desde localStorage
+    const titleCompleted = title.articles.filter(article =>
+      userProgressArticles[article.number]?.completed === true
+    ).length
     const titleTotal = title.articles.length
 
     totalArticles += titleTotal

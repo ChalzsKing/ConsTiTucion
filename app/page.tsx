@@ -17,6 +17,8 @@ import { useUserProgress } from "@/lib/user-progress"
 import { useOnlineSync } from "@/lib/hooks/useOnlineStatus"
 import { useSupabaseSync } from "@/lib/supabase-sync"
 import { AuthProvider } from "@/lib/auth/auth-context"
+import { debugSyncData, forceSync, verifyDataConsistency } from "@/lib/force-sync"
+import { supabase } from "@/lib/supabase-client"
 
 type AppState = "main" | "studying" | "exam" | "exam-results"
 
@@ -37,12 +39,24 @@ export default function HomePage() {
 
   // Initialize progress state on component mount
   useEffect(() => {
+    // Limpiar datos corruptos antes de inicializar
+    const { cleanAndMigrateLocalStorage } = require('@/lib/data-migration')
+    cleanAndMigrateLocalStorage()
+
     initializeProgressState()
     initializeDailySession()
 
     // Intentar sincronización inicial si hay conexión
     if (isOnline) {
       smartSync()
+    }
+
+    // Exponer funciones globalmente para debugging
+    if (typeof window !== 'undefined') {
+      (window as any).debugSyncData = debugSyncData;
+      (window as any).forceSync = forceSync;
+      (window as any).verifyDataConsistency = verifyDataConsistency;
+      (window as any).supabase = supabase;
     }
   }, [initializeDailySession, smartSync, isOnline])
 
