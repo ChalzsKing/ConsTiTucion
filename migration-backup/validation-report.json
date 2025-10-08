@@ -1,0 +1,38 @@
+{
+  "timestamp": "2025-09-30T17:18:29.694Z",
+  "migration_status": "COMPLETED_WITH_VALIDATIONS",
+  "summary": {
+    "components_migrated": "2/3",
+    "hook_status": "COMPLETE",
+    "deprecated_usages": 0,
+    "overall_status": "NEEDS_ATTENTION"
+  },
+  "details": {
+    "components": [
+      {
+        "component": "components/stats-dashboard.tsx",
+        "status": "SUCCESS",
+        "message": "Usando nueva API unificada",
+        "description": "Dashboard de estadísticas"
+      },
+      {
+        "component": "components/sidebar.tsx",
+        "status": "SUCCESS",
+        "message": "Usando nueva API unificada",
+        "description": "Barra lateral con progreso"
+      },
+      {
+        "component": "components/articulos-view.tsx",
+        "status": "PARTIAL",
+        "message": "Usa ambas APIs, revisar código",
+        "description": "Vista de artículos"
+      }
+    ],
+    "hook_validation": true,
+    "deprecated_functions": []
+  },
+  "next_steps": [
+    "Completar migración de componentes pendientes"
+  ],
+  "recommendations": []
+}

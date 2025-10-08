@@ -7,7 +7,8 @@ import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { ChevronDown, ChevronRight, CheckCircle2, Lock, Play, Trophy, Target, ArrowRight, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { constitutionData, getTitleProgress, type Article } from "@/lib/constitution-data"
+import { constitutionData, type Article } from "@/lib/constitution-data"
+import { useUnifiedProgress } from "@/lib/hooks/useUnifiedProgress"
 import { generateTitleExam, type ExamQuestion } from "@/lib/exam-data"
 import {
   getSmartExpandedTitles,
@@ -23,6 +24,9 @@ interface ArticulosViewProps {
 }
 
 export function ArticulosView({ onStartArticle, onStartExam }: ArticulosViewProps) {
+  // NUEVO: Hook unificado para progreso
+  const { getTitleProgress, overall, getArticleProgress } = useUnifiedProgress()
+
   const [expandedTitles, setExpandedTitles] = useState<string[]>([])
   const [showContinueCard, setShowContinueCard] = useState(false)
   const [continueInfo, setContinueInfo] = useState<any>(null)
@@ -147,11 +151,11 @@ export function ArticulosView({ onStartArticle, onStartExam }: ArticulosViewProp
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-primary">12%</div>
-                <div className="text-sm text-muted-foreground">8 de 73 artículos</div>
+                <div className="text-2xl font-bold text-primary">{overall.completionPercentage}%</div>
+                <div className="text-sm text-muted-foreground">{overall.completedArticles} de {overall.totalArticles} artículos</div>
               </div>
             </div>
-            <Progress value={12} className="h-3" />
+            <Progress value={overall.completionPercentage} className="h-3" />
           </CardContent>
         </Card>
 
@@ -198,7 +202,12 @@ export function ArticulosView({ onStartArticle, onStartExam }: ArticulosViewProp
 
       <div className="space-y-6">
         {constitutionData.map((title) => {
-          const progress = getTitleProgress(title.id)
+          const titleProgress = getTitleProgress(title.id)
+          const progress = titleProgress ? {
+            completed: titleProgress.completedArticles,
+            total: titleProgress.totalArticles,
+            percentage: titleProgress.percentage
+          } : { completed: 0, total: title.articles.length, percentage: 0 }
           const isExpanded = expandedTitles.includes(title.id)
 
           return (
@@ -243,9 +252,20 @@ export function ArticulosView({ onStartArticle, onStartExam }: ArticulosViewProp
               {isExpanded && (
                 <CardContent className="pt-0 pb-6">
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-                    {title.articles.map((article) => (
-                      <ArticleCard key={article.id} article={article} onClick={() => handleArticleClick(article)} />
-                    ))}
+                    {title.articles.map((article) => {
+                      // Obtener progreso desde Supabase
+                      const articleProgress = getArticleProgress(article.number)
+                      const isCompleted = articleProgress?.isCompleted || false
+
+                      return (
+                        <ArticleCard
+                          key={article.id}
+                          article={article}
+                          isCompleted={isCompleted}
+                          onClick={() => handleArticleClick(article)}
+                        />
+                      )
+                    })}
                   </div>
 
                   {progress.completed === progress.total && progress.total > 0 && (
@@ -282,12 +302,13 @@ export function ArticulosView({ onStartArticle, onStartExam }: ArticulosViewProp
 
 interface ArticleCardProps {
   article: Article
+  isCompleted: boolean
   onClick: () => void
 }
 
-function ArticleCard({ article, onClick }: ArticleCardProps) {
+function ArticleCard({ article, isCompleted, onClick }: ArticleCardProps) {
   const getCardStyle = () => {
-    if (article.completed) {
+    if (isCompleted) {
       return "bg-accent/10 border-accent text-accent hover:bg-accent/20 cursor-pointer"
     }
     if (article.available) {
@@ -297,7 +318,7 @@ function ArticleCard({ article, onClick }: ArticleCardProps) {
   }
 
   const getIcon = () => {
-    if (article.completed) {
+    if (isCompleted) {
       return <CheckCircle2 className="w-5 h-5" />
     }
     if (article.available) {

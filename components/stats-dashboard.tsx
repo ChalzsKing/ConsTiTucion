@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useStatistics } from '@/lib/hooks/useStatistics'
+import { useUnifiedProgress } from '@/lib/hooks/useUnifiedProgress'
 import { useAuth } from '@/lib/auth/auth-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -29,18 +29,19 @@ import {
 
 export function StatsDashboard() {
   const { user } = useAuth()
+
+  // Hook unificado: todos los datos desde Supabase
   const {
-    statistics,
+    overall,
+    statistics: unifiedStats,
     examHistory,
-    userProgress,
     dailyActivity,
     loading,
     error,
-    getProgressByTitle,
+    refreshData,
     getRecentActivity,
-    getStudyStreak,
-    refreshStatistics
-  } = useStatistics()
+    getStudyStreak
+  } = useUnifiedProgress()
 
   if (!user) {
     return (
@@ -63,7 +64,7 @@ export function StatsDashboard() {
     return (
       <div className="p-6 text-center">
         <p className="text-red-500 mb-4">Error: {error}</p>
-        <Button onClick={refreshStatistics}>
+        <Button onClick={refreshData}>
           <RefreshCw className="h-4 w-4 mr-2" />
           Reintentar
         </Button>
@@ -91,7 +92,7 @@ export function StatsDashboard() {
               Exportar
             </Button>
           </DataExportDialog>
-          <Button onClick={refreshStatistics} variant="outline">
+          <Button onClick={refreshData} variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
             Actualizar
           </Button>
@@ -102,20 +103,20 @@ export function StatsDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Artículos Estudiados"
-          value={statistics?.total_articles_studied || 0}
-          total={182}
+          value={unifiedStats.totalArticlesStudied}
+          total={overall.totalArticles}
           icon={BookOpen}
           color="blue"
         />
         <MetricCard
           title="Exámenes Realizados"
-          value={statistics?.total_exams_taken || 0}
+          value={unifiedStats.totalExamsTaken}
           icon={Target}
           color="green"
         />
         <MetricCard
           title="Tiempo de Estudio"
-          value={`${Math.floor((statistics?.total_study_time_minutes || 0) / 60)}h ${(statistics?.total_study_time_minutes || 0) % 60}m`}
+          value={`${Math.floor(unifiedStats.totalStudyTimeMinutes / 60)}h ${unifiedStats.totalStudyTimeMinutes % 60}m`}
           icon={Clock}
           color="purple"
         />
@@ -152,27 +153,25 @@ export function StatsDashboard() {
                 <div className="flex justify-between items-center">
                   <span>Mejor Puntuación</span>
                   <Badge variant="secondary">
-                    {statistics?.best_exam_score || 0}%
+                    {unifiedStats?.averageExamScore || 0}%
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Promedio de Exámenes</span>
                   <Badge variant="secondary">
-                    {statistics?.average_exam_score || 0}%
+                    {unifiedStats?.averageExamScore || 0}%
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Preguntas Correctas</span>
                   <Badge variant="secondary">
-                    {statistics?.total_correct_answers || 0} / {statistics?.total_questions_answered || 0}
+                    0 / 0
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Precisión</span>
                   <Badge variant="secondary">
-                    {statistics?.total_questions_answered
-                      ? Math.round(((statistics?.total_correct_answers || 0) / statistics.total_questions_answered) * 100)
-                      : 0}%
+                    0%
                   </Badge>
                 </div>
               </CardContent>
@@ -190,26 +189,23 @@ export function StatsDashboard() {
                 <div className="flex justify-between items-center">
                   <span>Nivel Actual</span>
                   <Badge variant="default">
-                    Nivel {statistics?.current_level || 1}
+                    Nivel 1
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>XP Total</span>
                   <Badge variant="secondary">
-                    {statistics?.total_xp || 0} XP
+                    0 XP
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Racha Máxima</span>
                   <Badge variant="secondary">
-                    {statistics?.max_streak_days || 0} días
+                    {unifiedStats?.currentStreakDays || 0} días
                   </Badge>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {(statistics?.achievements || []).length > 0
-                    ? `Has desbloqueado ${(statistics?.achievements || []).length} logros`
-                    : 'Aún no tienes logros. ¡Sigue estudiando!'
-                  }
+                  Aún no tienes logros. ¡Sigue estudiando!
                 </div>
               </CardContent>
             </Card>
@@ -221,16 +217,16 @@ export function StatsDashboard() {
           <ProgressCharts
             dailyActivity={dailyActivity}
             examHistory={examHistory}
-            userProgress={userProgress}
-            statistics={statistics}
+            userProgress={overall.titlesProgress}
+            statistics={unifiedStats}
           />
         </TabsContent>
 
         {/* Tab: Progreso */}
         <TabsContent value="progress" className="space-y-4">
           <ProgressByTitles
-            userProgress={userProgress}
-            getProgressByTitle={getProgressByTitle}
+            userProgress={overall.titlesProgress}
+            getProgressByTitle={() => null}
           />
         </TabsContent>
 

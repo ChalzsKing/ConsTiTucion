@@ -2036,3 +2036,18 @@ export function initializeProgressState() {
   // Load any existing progress from localStorage
   loadProgressFromStorage()
 }
+
+/**
+ * Obtiene el titleId (título constitucional) de un artículo por su número
+ * @param articleNumber Número del artículo (1-169)
+ * @returns El titleId ('preliminar', 'titulo1', etc.) o null si no se encuentra
+ */
+export function getTitleIdFromArticleNumber(articleNumber: number): string | null {
+  for (const title of constitutionData) {
+    const article = title.articles.find(a => a.number === articleNumber)
+    if (article) {
+      return title.id
+    }
+  }
+  return null
+}

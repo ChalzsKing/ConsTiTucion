@@ -1,0 +1,43 @@
+{
+  "timestamp": "2025-09-29T13:33:14.358Z",
+  "summary": {
+    "status": "MIGRATION_REQUIRED",
+    "priority": "CRITICAL",
+    "estimatedTime": "3.5 hours"
+  },
+  "discrepancies": [
+    {
+      "issue": "Constitution data vs expected total",
+      "current": "177 articles in code",
+      "expected": "182 articles total",
+      "severity": "HIGH"
+    },
+    {
+      "issue": "Multiple data sources",
+      "current": "4 functions reading from localStorage, 1 from Supabase",
+      "expected": "Single source of truth (Supabase)",
+      "severity": "CRITICAL"
+    },
+    {
+      "issue": "Data inconsistency",
+      "current": "Different counters showing different numbers",
+      "expected": "All counters showing same number",
+      "severity": "CRITICAL"
+    }
+  ],
+  "migrationPlan": {
+    "phase1": "Diagnose and backup (30min)",
+    "phase2": "Mass data migration (45min)",
+    "phase3": "API refactoring (60min)",
+    "phase4": "Component updates (45min)",
+    "phase5": "Final validation (30min)"
+  },
+  "nextSteps": [
+    "Execute this diagnosis script ✅",
+    "Create localStorage backup",
+    "Run migration script",
+    "Implement unified progress hook",
+    "Update all components",
+    "Validate consistency"
+  ]
+}

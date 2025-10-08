@@ -7,11 +7,12 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, CheckCircle2, XCircle, ArrowRight, BookOpen, Clock, Target } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Article } from "@/lib/constitution-data"
-import { updateArticleProgress } from "@/lib/constitution-data"
 import { useSupabaseQuestions, type SupabaseQuestion } from "@/lib/hooks/useSupabaseQuestions"
-import { useUserProgress, formatStudyTime } from "@/lib/user-progress"
+import { useArticleProgress } from "@/lib/hooks/useUnifiedProgress"
+import { formatStudyTime } from "@/lib/user-progress"
 import { getArticleNavigation, getArticleBreadcrumbs, type ArticleNavigation } from "@/lib/article-navigation"
 import { useArticleNavigationShortcuts, formatShortcutKey } from "@/lib/hooks/useKeyboardShortcuts"
+import { getTitleIdFromArticleNumber } from "@/lib/constitution-data"
 
 interface StudyFlowProps {
   article: Article
@@ -32,17 +33,14 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
   // Hooks
   const { question, loading, error } = useSupabaseQuestions(article.number)
   const {
+    articleProgress,
     markArticleCompleted,
-    addStudyTime,
-    getArticleProgress,
-    initializeDailySession,
-    settings
-  } = useUserProgress()
+    loading: progressLoading,
+    error: progressError
+  } = useArticleProgress(article.number)
 
-  // Inicializar sesión al montar el componente
-  useEffect(() => {
-    initializeDailySession()
-  }, [initializeDailySession])
+  // LEGACY FUNCTIONS DESACTIVADAS - Ahora usamos hook unificado
+  // const { addStudyTime, initializeDailySession, settings } = useUserProgress()
 
   // Timer para tracking del tiempo de estudio
   useEffect(() => {
@@ -53,23 +51,16 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
     return () => clearInterval(timer)
   }, [startTime])
 
-  // Obtener progreso actual del artículo
-  const articleProgress = getArticleProgress(article.number)
-
   // Obtener información de navegación
   const navigation = getArticleNavigation(article.number)
   const breadcrumbs = getArticleBreadcrumbs(article.number)
 
-  const handleContinueToQuestion = () => {
-    // Guardar tiempo de lectura antes de continuar
-    addStudyTime(article.number, article.titleId, studyTime)
-
+  const handleContinueToQuestion = async () => {
     if (question) {
       setPhase("question")
     } else {
       // Si no hay pregunta, marcar como completado solo por lectura
-      markArticleCompleted(article.number, article.titleId, studyTime)
-      updateArticleProgress(article.id, true, true)
+      await markArticleCompleted(article.titleId, studyTime)
       onComplete(true)
     }
   }
@@ -96,19 +87,18 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
     setPhase("result")
 
     // Auto-advance after showing result
-    setTimeout(() => {
-      // Marcar como completado con tiempo total de estudio
-      markArticleCompleted(article.number, article.titleId, studyTime)
-
-      // Update article progress and unlock next article
-      updateArticleProgress(article.id, true, correct || false)
+    setTimeout(async () => {
+      // Obtener titleId del artículo
+      const titleId = getTitleIdFromArticleNumber(article.number)
+      if (titleId) {
+        // Marcar como completado con tiempo total de estudio
+        await markArticleCompleted(titleId, studyTime)
+      }
       onComplete(correct || false)
     }, 3000)
   }
 
   const handleNext = () => {
-    // Update article progress and unlock next article
-    updateArticleProgress(article.id, true, isCorrect || false)
     onComplete(isCorrect || false)
   }
 

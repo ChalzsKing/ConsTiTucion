@@ -13,7 +13,7 @@ Este documento contiene las instrucciones paso a paso para aplicar todas las tab
 
 ---
 
-## 📊 **PASO 2: Ejecutar el Script de Tablas**
+## 📊 **PASO 2: Ejecutar el Script de Tablas** 
 
 Copia y ejecuta **TODO** el contenido del archivo `database/statistics_tables.sql`:
 

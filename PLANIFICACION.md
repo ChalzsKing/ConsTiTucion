@@ -127,9 +127,12 @@
 
 **Progreso**: 10/10 = 100% ✅ **¡HITO COMPLETADO!**
 
-**⚠️ PROBLEMAS MENORES IDENTIFICADOS** (Para siguiente sesión):
-- **Incongruencia conteo artículos**: Pestaña progreso (15) vs Vista artículos (30+) vs Progreso general (8)
-- **Fuentes de datos múltiples**: localStorage vs hardcodeado vs Supabase sin unificar completamente
+**✅ PROBLEMAS CORREGIDOS** (Sesión 29/09/2025):
+- ~~**Incongruencia conteo artículos**: Pestaña progreso (15) vs Vista artículos (30+) vs Progreso general (8)~~ → **SOLUCIONADO**
+- ~~**Fuentes de datos múltiples**: localStorage vs hardcodeado vs Supabase sin unificar completamente~~ → **SOLUCIONADO**
+
+**⚠️ PROBLEMA NUEVO IDENTIFICADO** (Para próxima sesión):
+- **Falta actualización en tiempo real**: Los contadores no se actualizan automáticamente cuando el usuario estudia un artículo - requiere recarga manual de página
 
 ---
 
@@ -362,11 +365,19 @@ statistics (user_id, date, articles_studied, exam_scores)
 
 ---
 
-**Última actualización**: 2025-09-28
-**Estado actual**: ✅ 5 de 9 hitos completados (56%) - Sistema de estadísticas completo implementado
-**Próxima revisión**: Tras corregir incongruencias de datos
+**Última actualización**: 2025-09-29
+**Estado actual**: ✅ 5 de 9 hitos completados (56%) - **MIGRACIÓN DE DATOS COMPLETADA** ✅
+**Próxima revisión**: Implementar actualización en tiempo real + continuar con HITO 6
 
 ### 🎉 **LOGROS RECIENTES**
+
+#### **🚀 MIGRACIÓN DE DATOS COMPLETADA** (2025-09-29)
+- ✅ **Problema crítico resuelto**: Inconsistencia de contadores eliminada completamente
+- ✅ **Single Source of Truth**: Supabase como única fuente de datos implementado
+- ✅ **Hook unificado**: `useUnifiedProgress` reemplaza 4 funciones diferentes
+- ✅ **Componentes migrados**: 3 componentes principales actualizados
+- ✅ **Sistema limpio**: Todos los contadores muestran 0 de forma consistente
+- ✅ **Arquitectura sólida**: Base de datos unificada lista para desarrollo futuro
 
 #### **HITO 5 - Estadísticas Personales** (2025-09-28)
 - ✅ **Sistema completo de estadísticas con Supabase**

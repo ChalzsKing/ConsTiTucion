@@ -11,14 +11,15 @@ import { EstadisticasView } from "@/components/estadisticas-view"
 import { PerfilView } from "@/components/perfil-view"
 import type { Article } from "@/lib/constitution-data"
 import type { ExamQuestion } from "@/lib/exam-data"
-import { initializeProgressState, constitutionData } from "@/lib/constitution-data"
-import { clearStudyPosition } from "@/lib/navigation-state"
-import { useUserProgress } from "@/lib/user-progress"
-import { useOnlineSync } from "@/lib/hooks/useOnlineStatus"
-import { useSupabaseSync } from "@/lib/supabase-sync"
+// IMPORTS LEGACY COMENTADOS - Ahora usamos sistema unificado
+import { constitutionData } from "@/lib/constitution-data"
+// import { initializeProgressState, clearStudyPosition } from "@/lib/navigation-state"
+// import { useUserProgress } from "@/lib/user-progress"
+// import { useOnlineSync } from "@/lib/hooks/useOnlineStatus"
+// import { useSupabaseSync } from "@/lib/supabase-sync"
 import { AuthProvider } from "@/lib/auth/auth-context"
-import { debugSyncData, forceSync, verifyDataConsistency } from "@/lib/force-sync"
-import { supabase } from "@/lib/supabase-client"
+// import { debugSyncData, forceSync, verifyDataConsistency } from "@/lib/force-sync"
+// import { supabase } from "@/lib/supabase-client"
 
 type AppState = "main" | "studying" | "exam" | "exam-results"
 
@@ -28,44 +29,47 @@ export default function HomePage() {
   const [studyingArticle, setStudyingArticle] = useState<Article | null>(null)
   const [examData, setExamData] = useState<{ questions: ExamQuestion[]; title: string } | null>(null)
   const [examResults, setExamResults] = useState<any>(null)
+  const [refreshKey, setRefreshKey] = useState(0) // Key para forzar refresh
 
-  // Hooks para persistencia y sincronización
-  const { initializeDailySession } = useUserProgress()
-  const { smartSync } = useSupabaseSync()
-  const { isOnline } = useOnlineSync(() => {
-    // Auto-sync cuando se restaura la conexión
-    smartSync()
-  })
+  // HOOKS LEGACY DESACTIVADOS - Ahora usamos useUnifiedProgress
+  // const { initializeDailySession } = useUserProgress()
+  // const { smartSync } = useSupabaseSync()
+  // const { isOnline } = useOnlineSync(() => {
+  //   // Auto-sync cuando se restaura la conexión
+  //   smartSync()
+  // })
 
   // Initialize progress state on component mount
   useEffect(() => {
-    // Limpiar datos corruptos antes de inicializar
-    const { cleanAndMigrateLocalStorage } = require('@/lib/data-migration')
-    cleanAndMigrateLocalStorage()
+    // SISTEMA LEGACY DESACTIVADO - Ahora usamos useUnifiedProgress
+    // const { cleanAndMigrateLocalStorage } = require('@/lib/data-migration')
+    // cleanAndMigrateLocalStorage()
 
-    initializeProgressState()
-    initializeDailySession()
+    // initializeProgressState()
+    // initializeDailySession()
 
     // Intentar sincronización inicial si hay conexión
-    if (isOnline) {
-      smartSync()
-    }
+    // if (isOnline) {
+    //   smartSync()
+    // }
 
-    // Exponer funciones globalmente para debugging
-    if (typeof window !== 'undefined') {
-      (window as any).debugSyncData = debugSyncData;
-      (window as any).forceSync = forceSync;
-      (window as any).verifyDataConsistency = verifyDataConsistency;
-      (window as any).supabase = supabase;
-    }
-  }, [initializeDailySession, smartSync, isOnline])
+    console.log('🎯 Usando sistema unificado - Legacy desactivado')
 
-  // Limpiar posición de estudio cuando el usuario cambie de sección (excepto artículos)
-  useEffect(() => {
-    if (activeSection !== "articulos") {
-      clearStudyPosition()
-    }
-  }, [activeSection])
+    // DEBUG FUNCTIONS DESACTIVADAS - Usar hook unificado
+    // if (typeof window !== 'undefined') {
+    //   (window as any).debugSyncData = debugSyncData;
+    //   (window as any).forceSync = forceSync;
+    //   (window as any).verifyDataConsistency = verifyDataConsistency;
+    //   (window as any).supabase = supabase;
+    // }
+  }, []) // Dependencias removidas - sistema legacy desactivado
+
+  // FUNCIÓN LEGACY DESACTIVADA - clearStudyPosition puede causar efectos secundarios
+  // useEffect(() => {
+  //   if (activeSection !== "articulos") {
+  //     clearStudyPosition()
+  //   }
+  // }, [activeSection])
 
   const handleStartArticle = (article: Article) => {
     setStudyingArticle(article)
@@ -76,6 +80,8 @@ export default function HomePage() {
     console.log(`Study completed for article ${studyingArticle?.number}: ${success ? "Success" : "Failed"}`)
     setStudyingArticle(null)
     setAppState("main")
+    // Forzar refresh de datos
+    setRefreshKey(prev => prev + 1)
   }
 
   const handleStartExam = (questions: ExamQuestion[], title: string) => {
@@ -86,6 +92,8 @@ export default function HomePage() {
   const handleExamComplete = (results: any) => {
     setExamResults(results)
     setAppState("exam-results")
+    // Forzar refresh de datos después del examen
+    setRefreshKey(prev => prev + 1)
   }
 
   const handleBackToMain = () => {
@@ -219,15 +227,15 @@ export default function HomePage() {
   const renderContent = () => {
     switch (activeSection) {
       case "articulos":
-        return <ArticulosView onStartArticle={handleStartArticle} onStartExam={handleStartExam} />
+        return <ArticulosView key={refreshKey} onStartArticle={handleStartArticle} onStartExam={handleStartExam} />
       case "examenes":
         return <ExamenesView onStartExam={handleStartExam} />
       case "estadisticas":
-        return <EstadisticasView />
+        return <EstadisticasView key={refreshKey} />
       case "perfil":
         return <PerfilView />
       default:
-        return <ArticulosView onStartArticle={handleStartArticle} onStartExam={handleStartExam} />
+        return <ArticulosView key={refreshKey} onStartArticle={handleStartArticle} onStartExam={handleStartExam} />
     }
   }
 

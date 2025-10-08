@@ -88,8 +88,8 @@ export class SupabaseSync {
       // Sincronizar estadísticas generales
       await this.syncStatisticsToSupabase(localProgress)
 
-      // Sincronizar configuraciones
-      await this.syncSettingsToSupabase(localProgress.settings)
+      // Sincronizar configuraciones (DESHABILITADO - tabla user_settings no existe)
+      // await this.syncSettingsToSupabase(localProgress.settings)
 
       console.log('✅ Successfully synced to Supabase')
       return true

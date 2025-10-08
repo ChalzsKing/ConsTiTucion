@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { BookOpen, FileText, BarChart3, User, Shield, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getOverallProgress } from "@/lib/constitution-data"
+import { useOverallProgress } from "@/lib/hooks/useUnifiedProgress"
 
 interface SidebarProps {
   activeSection: string
@@ -12,7 +12,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
-  const [progress, setProgress] = useState({ completed: 0, total: 182, percentage: 0 })
+  const { overall, loading } = useOverallProgress()
   const [isHydrated, setIsHydrated] = useState(false)
 
   const menuItems = [
@@ -42,10 +42,9 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
     },
   ]
 
-  // Actualizar progreso después de la hidratación
+  // Hidratación del componente
   useEffect(() => {
     setIsHydrated(true)
-    setProgress(getOverallProgress())
   }, [])
 
   return (
@@ -95,14 +94,14 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Progreso General</span>
-            <span className="text-sm text-muted-foreground">{progress.percentage}%</span>
+            <span className="text-sm text-muted-foreground">{overall.completionPercentage}%</span>
           </div>
           <div className="w-full bg-secondary rounded-full h-2">
-            <div className="bg-accent h-2 rounded-full" style={{ width: `${progress.percentage}%` }}></div>
+            <div className="bg-accent h-2 rounded-full" style={{ width: `${overall.completionPercentage}%` }}></div>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <CheckCircle2 className="w-4 h-4 text-accent" />
-            <span>{progress.completed} artículos completados</span>
+            <span>{overall.completedArticles} artículos completados</span>
           </div>
         </div>
       </Card>
