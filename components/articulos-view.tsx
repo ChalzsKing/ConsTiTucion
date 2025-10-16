@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { ChevronDown, ChevronRight, CheckCircle2, Lock, Play, Trophy, Target, ArrowRight, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { constitutionData, type Article } from "@/lib/constitution-data"
-import { useUnifiedProgress } from "@/lib/hooks/useUnifiedProgress"
+import { useProgress } from "@/lib/hooks/useUnifiedProgressContext"
 import { generateTitleExam, type ExamQuestion } from "@/lib/exam-data"
 import {
   getSmartExpandedTitles,
@@ -24,8 +24,8 @@ interface ArticulosViewProps {
 }
 
 export function ArticulosView({ onStartArticle, onStartExam }: ArticulosViewProps) {
-  // NUEVO: Hook unificado para progreso
-  const { getTitleProgress, overall, getArticleProgress } = useUnifiedProgress()
+  // Hook desde contexto global - actualización en tiempo real
+  const { getTitleProgress, overall, getArticleProgress } = useProgress()
 
   const [expandedTitles, setExpandedTitles] = useState<string[]>([])
   const [showContinueCard, setShowContinueCard] = useState(false)

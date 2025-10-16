@@ -4,7 +4,10 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
+import { Toaster } from "sonner"
 import { AuthProvider } from "@/lib/auth/auth-context"
+import { ProgressProvider } from "@/lib/hooks/useUnifiedProgressContext"
+import { AchievementToastListener } from "@/components/gamification/achievement-toast"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -23,7 +26,11 @@ export default function RootLayout({
     <html lang="es">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <AuthProvider>
-          <Suspense fallback={null}>{children}</Suspense>
+          <ProgressProvider>
+            <Suspense fallback={null}>{children}</Suspense>
+            <AchievementToastListener />
+            <Toaster position="top-center" richColors />
+          </ProgressProvider>
         </AuthProvider>
         <Analytics />
       </body>

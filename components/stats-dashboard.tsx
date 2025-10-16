@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useUnifiedProgress } from '@/lib/hooks/useUnifiedProgress'
+import { useProgress } from '@/lib/hooks/useUnifiedProgressContext'
 import { useAuth } from '@/lib/auth/auth-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -30,7 +30,7 @@ import {
 export function StatsDashboard() {
   const { user } = useAuth()
 
-  // Hook unificado: todos los datos desde Supabase
+  // Hook desde contexto global - actualización en tiempo real
   const {
     overall,
     statistics: unifiedStats,
@@ -41,7 +41,7 @@ export function StatsDashboard() {
     refreshData,
     getRecentActivity,
     getStudyStreak
-  } = useUnifiedProgress()
+  } = useProgress()
 
   if (!user) {
     return (

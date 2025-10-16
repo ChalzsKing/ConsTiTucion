@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import type { ExamQuestion } from "@/lib/exam-data"
 import { calculateScore, saveExamResult } from "@/lib/exam-data"
 import { useStatistics } from "@/lib/hooks/useStatistics"
+import { useAchievements } from "@/lib/hooks/useAchievements"
 
 interface ExamFlowProps {
   questions: ExamQuestion[]
@@ -25,6 +26,7 @@ export function ExamFlow({ questions, examTitle, onComplete, onBack }: ExamFlowP
   const [timeElapsed, setTimeElapsed] = useState(0)
   const [isCompleted, setIsCompleted] = useState(false)
   const { saveExamResult: saveToSupabase } = useStatistics()
+  const { addXP, checkAllAchievements } = useAchievements()
 
   // Timer effect
   useEffect(() => {
@@ -108,6 +110,42 @@ export function ExamFlow({ questions, examTitle, onComplete, onBack }: ExamFlowP
       console.log('✅ Exam result saved to Supabase')
     } catch (error) {
       console.error('❌ Error saving exam result to Supabase:', error)
+    }
+
+    // 🎮 Gamificación: Añadir XP por completar examen
+    try {
+      const percentage = results.percentage
+
+      // XP base por completar el examen
+      let xpEarned = 20
+
+      // Bonus por porcentaje de acierto
+      if (percentage >= 100) {
+        xpEarned += 200 // Perfect score
+      } else if (percentage >= 90) {
+        xpEarned += 100 // Excelente
+      } else if (percentage >= 75) {
+        xpEarned += 50 // Notable
+      } else if (percentage >= 50) {
+        xpEarned += 25 // Aprobado
+      }
+
+      // XP adicional por cada respuesta correcta
+      xpEarned += results.score * 5
+
+      // Añadir XP
+      await addXP(
+        xpEarned,
+        percentage >= 50 ? 'exam_passed' : 'exam_completed',
+        examTitle.includes("General") ? "general" : extractTitleId(examTitle) || "unknown"
+      )
+
+      // Verificar logros
+      await checkAllAchievements()
+
+      console.log(`✅ Gamification: +${xpEarned} XP awarded for exam (${percentage}%)`)
+    } catch (error) {
+      console.error('❌ Error adding XP for exam:', error)
     }
 
     setTimeout(() => {

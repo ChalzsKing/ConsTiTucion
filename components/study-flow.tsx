@@ -8,7 +8,8 @@ import { ArrowLeft, CheckCircle2, XCircle, ArrowRight, BookOpen, Clock, Target }
 import { cn } from "@/lib/utils"
 import type { Article } from "@/lib/constitution-data"
 import { useSupabaseQuestions, type SupabaseQuestion } from "@/lib/hooks/useSupabaseQuestions"
-import { useArticleProgress } from "@/lib/hooks/useUnifiedProgress"
+import { useProgress } from "@/lib/hooks/useUnifiedProgressContext"
+import { useAchievements } from "@/lib/hooks/useAchievements"
 import { formatStudyTime } from "@/lib/user-progress"
 import { getArticleNavigation, getArticleBreadcrumbs, type ArticleNavigation } from "@/lib/article-navigation"
 import { useArticleNavigationShortcuts, formatShortcutKey } from "@/lib/hooks/useKeyboardShortcuts"
@@ -32,12 +33,9 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
 
   // Hooks
   const { question, loading, error } = useSupabaseQuestions(article.number)
-  const {
-    articleProgress,
-    markArticleCompleted,
-    loading: progressLoading,
-    error: progressError
-  } = useArticleProgress(article.number)
+  const { getArticleProgress, markArticleCompleted, refreshData, getTitleProgress } = useProgress()
+  const { addXP, checkAllAchievements } = useAchievements()
+  const articleProgress = getArticleProgress(article.number)
 
   // LEGACY FUNCTIONS DESACTIVADAS - Ahora usamos hook unificado
   // const { addStudyTime, initializeDailySession, settings } = useUserProgress()
@@ -55,12 +53,23 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
   const navigation = getArticleNavigation(article.number)
   const breadcrumbs = getArticleBreadcrumbs(article.number)
 
+  // Obtener progreso real del título desde Supabase
+  const realTitleProgress = navigation ? getTitleProgress(navigation.title.id) : null
+
   const handleContinueToQuestion = async () => {
     if (question) {
       setPhase("question")
     } else {
       // Si no hay pregunta, marcar como completado solo por lectura
-      await markArticleCompleted(article.titleId, studyTime)
+      await markArticleCompleted(article.number, article.titleId, studyTime)
+
+      // 🎮 Gamificación: Añadir XP por completar artículo
+      if (!articleProgress?.completed) {
+        await addXP(10, 'article_completed', `article-${article.number}`)
+        await checkAllAchievements()
+      }
+
+      await refreshData() // Refrescar para actualizar todos los componentes
       onComplete(true)
     }
   }
@@ -92,7 +101,21 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
       const titleId = getTitleIdFromArticleNumber(article.number)
       if (titleId) {
         // Marcar como completado con tiempo total de estudio
-        await markArticleCompleted(titleId, studyTime)
+        await markArticleCompleted(article.number, titleId, studyTime)
+
+        // 🎮 Gamificación: Añadir XP por completar artículo
+        if (!articleProgress?.completed) {
+          await addXP(10, 'article_completed', `article-${article.number}`)
+
+          // Bonus XP por responder correctamente
+          if (correct) {
+            await addXP(5, 'question_correct', `article-${article.number}`)
+          }
+
+          await checkAllAchievements()
+        }
+
+        await refreshData() // Refrescar para actualizar todos los componentes
       }
       onComplete(correct || false)
     }, 3000)
@@ -163,19 +186,19 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
             </div>
           </div>
 
-          {/* Progress Bar */}
-          {navigation && (
+          {/* Progress Bar - Datos reales de Supabase */}
+          {navigation && realTitleProgress && (
             <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">{navigation.title.title}</span>
                 <span className="text-sm text-muted-foreground">
-                  {navigation.titleProgress.completionPercentage}% completado
+                  {realTitleProgress.percentage}% completado ({realTitleProgress.completedArticles}/{realTitleProgress.totalArticles})
                 </span>
               </div>
               <div className="w-full bg-background rounded-full h-2 border">
                 <div
                   className="bg-primary rounded-full h-2 transition-all duration-300"
-                  style={{ width: `${navigation.titleProgress.completionPercentage}%` }}
+                  style={{ width: `${realTitleProgress.percentage}%` }}
                 ></div>
               </div>
             </div>

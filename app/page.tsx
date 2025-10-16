@@ -9,6 +9,7 @@ import { ExamFlow } from "@/components/exam-flow"
 import { ExamResults } from "@/components/exam-results"
 import { EstadisticasView } from "@/components/estadisticas-view"
 import { PerfilView } from "@/components/perfil-view"
+import { LogrosView } from "@/components/logros-view"
 import type { Article } from "@/lib/constitution-data"
 import type { ExamQuestion } from "@/lib/exam-data"
 // IMPORTS LEGACY COMENTADOS - Ahora usamos sistema unificado
@@ -232,6 +233,8 @@ export default function HomePage() {
         return <ExamenesView onStartExam={handleStartExam} />
       case "estadisticas":
         return <EstadisticasView key={refreshKey} />
+      case "logros":
+        return <LogrosView />
       case "perfil":
         return <PerfilView />
       default:
