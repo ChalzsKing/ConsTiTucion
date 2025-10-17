@@ -2,10 +2,12 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { BookOpen, FileText, BarChart3, User, Shield, CheckCircle2, Trophy, Flame } from "lucide-react"
+import { BookOpen, FileText, BarChart3, User, Shield, CheckCircle2, Trophy, Flame, CreditCard } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useProgress } from "@/lib/hooks/useUnifiedProgressContext"
 import { useAchievements } from "@/lib/hooks/useAchievements"
+import { SubscriptionBadge } from "@/components/subscription/SubscriptionBadge"
+import { useRouter } from "next/navigation"
 
 interface SidebarProps {
   activeSection: string
@@ -13,6 +15,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
+  const router = useRouter()
   const { overall, loading, getStudyStreak } = useProgress()
   const { xpData, unlockedCount, totalBadges } = useAchievements()
   const [isHydrated, setIsHydrated] = useState(false)
@@ -61,15 +64,16 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
     <div className="w-64 h-screen bg-sidebar border-r border-sidebar-border flex flex-col">
       {/* Logo and Title */}
       <div className="p-6 border-b border-sidebar-border">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
             <Shield className="w-6 h-6 text-primary-foreground" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-xl font-bold text-sidebar-foreground">ConstiMaster</h1>
             <p className="text-sm text-muted-foreground">Domina la Constitución</p>
           </div>
         </div>
+        <SubscriptionBadge />
       </div>
 
       {/* Navigation Menu */}
@@ -98,6 +102,22 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
             </Button>
           )
         })}
+
+        {/* Separador */}
+        <div className="border-t my-2" />
+
+        {/* Botón de Facturación */}
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 h-12 text-left text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          onClick={() => router.push('/billing')}
+        >
+          <CreditCard className="w-5 h-5" />
+          <div className="flex flex-col items-start">
+            <span className="font-medium">Facturación</span>
+            <span className="text-xs opacity-75">Gestiona tu plan</span>
+          </div>
+        </Button>
       </nav>
 
       {/* Progreso General */}

@@ -68,6 +68,8 @@ export function useSubscription(): SubscriptionHook {
   // Cargar suscripción y límites del usuario
   useEffect(() => {
     if (!user) {
+      // Usuario NO autenticado - sin límites, debe registrarse
+      console.log('🔍 No user authenticated - must register to take exams')
       setSubscription(null)
       setUsageLimits(null)
       setLoading(false)
@@ -84,6 +86,8 @@ export function useSubscription(): SubscriptionHook {
       setLoading(true)
       setError(null)
 
+      console.log('🔍 Loading subscription data for user:', user.id)
+
       // Cargar suscripción
       const { data: subData, error: subError } = await supabase
         .from('subscriptions')
@@ -91,8 +95,11 @@ export function useSubscription(): SubscriptionHook {
         .eq('user_id', user.id)
         .single()
 
+      console.log('📊 Subscription query result:', { subData, subError })
+
       if (subError && subError.code !== 'PGRST116') {
         // PGRST116 = no rows found
+        console.error('❌ Subscription error:', subError)
         throw subError
       }
 
@@ -119,6 +126,8 @@ export function useSubscription(): SubscriptionHook {
       currentMonth.setDate(1)
       currentMonth.setHours(0, 0, 0, 0)
 
+      console.log('🔍 Loading usage limits...')
+
       const { data: limitsData, error: limitsError } = await supabase
         .from('usage_limits')
         .select('*')
@@ -126,7 +135,10 @@ export function useSubscription(): SubscriptionHook {
         .gte('period_start', currentMonth.toISOString())
         .single()
 
+      console.log('📊 Usage limits query result:', { limitsData, limitsError })
+
       if (limitsError && limitsError.code !== 'PGRST116') {
+        console.error('❌ Usage limits error:', limitsError)
         throw limitsError
       }
 
@@ -184,6 +196,8 @@ export function useSubscription(): SubscriptionHook {
 
   // Verificar si puede hacer examen general
   const canTakeGeneralExam = (): boolean => {
+    // Si no hay usuario autenticado, no puede hacer exámenes
+    if (!user) return false
     if (isPro()) return true
     if (!usageLimits) return false
 
@@ -192,6 +206,8 @@ export function useSubscription(): SubscriptionHook {
 
   // Verificar si puede hacer examen de título
   const canTakeTitleExam = (titleId: string): boolean => {
+    // Si no hay usuario autenticado, no puede hacer exámenes
+    if (!user) return false
     if (isPro()) return true
     if (!usageLimits) return false
 
