@@ -127,13 +127,13 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
 
   if (phase === "reading") {
     return (
-      <div className="min-h-screen bg-background p-6">
+      <div className="min-h-screen bg-background p-4 md:p-6">
         <div className="max-w-4xl mx-auto">
           {/* Breadcrumbs */}
-          <div className="mb-4">
-            <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="mb-3 md:mb-4 overflow-x-auto">
+            <nav className="flex items-center gap-1 md:gap-2 text-xs md:text-sm text-muted-foreground whitespace-nowrap">
               {breadcrumbs.map((crumb, index) => (
-                <div key={crumb.id} className="flex items-center gap-2">
+                <div key={crumb.id} className="flex items-center gap-1 md:gap-2">
                   {index > 0 && <span>/</span>}
                   {crumb.href ? (
                     <button className="hover:text-foreground transition-colors">
@@ -148,39 +148,41 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
           </div>
 
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Volver al mapa
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6 md:mb-8">
+            <div className="flex flex-wrap items-center gap-2 md:gap-4">
+              <Button variant="ghost" size="sm" onClick={onBack} className="gap-1 md:gap-2 text-xs md:text-sm">
+                <ArrowLeft className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="hidden sm:inline">Volver al mapa</span>
+                <span className="sm:hidden">Volver</span>
               </Button>
-              <Badge variant="outline" className="gap-2">
-                <BookOpen className="w-4 h-4" />
-                Artículo {article.number}
+              <Badge variant="outline" className="gap-1 md:gap-2 text-xs">
+                <BookOpen className="w-3 h-3 md:w-4 md:h-4" />
+                Art. {article.number}
               </Badge>
               {articleProgress?.completed && (
-                <Badge variant="default" className="gap-2">
-                  <CheckCircle2 className="w-4 h-4" />
-                  Completado
+                <Badge variant="default" className="gap-1 md:gap-2 text-xs">
+                  <CheckCircle2 className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Completado</span>
+                  <span className="sm:hidden">✓</span>
                 </Badge>
               )}
               {navigation && (
-                <Badge variant="secondary" className="gap-2">
-                  <Target className="w-4 h-4" />
-                  {navigation.titleProgress.currentIndex + 1} de {navigation.titleProgress.totalArticles}
+                <Badge variant="secondary" className="gap-1 md:gap-2 text-xs">
+                  <Target className="w-3 h-3 md:w-4 md:h-4" />
+                  {navigation.titleProgress.currentIndex + 1}/{navigation.titleProgress.totalArticles}
                 </Badge>
               )}
             </div>
 
-            <div className="flex items-center gap-4">
-              <Badge variant="secondary" className="gap-2">
-                <Clock className="w-4 h-4" />
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className="gap-1 md:gap-2 text-xs">
+                <Clock className="w-3 h-3 md:w-4 md:h-4" />
                 {formatStudyTime(studyTime)}
               </Badge>
               {articleProgress && (
-                <Badge variant="outline" className="gap-2">
-                  <Target className="w-4 h-4" />
-                  {articleProgress.timesStudied} {articleProgress.timesStudied === 1 ? 'vez' : 'veces'}
+                <Badge variant="outline" className="gap-1 md:gap-2 text-xs">
+                  <Target className="w-3 h-3 md:w-4 md:h-4" />
+                  {articleProgress.timesStudied}x
                 </Badge>
               )}
             </div>
@@ -188,16 +190,16 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
 
           {/* Progress Bar - Datos reales de Supabase */}
           {navigation && realTitleProgress && (
-            <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">{navigation.title.title}</span>
-                <span className="text-sm text-muted-foreground">
-                  {realTitleProgress.percentage}% completado ({realTitleProgress.completedArticles}/{realTitleProgress.totalArticles})
+            <div className="mb-4 md:mb-6 p-3 md:p-4 bg-primary/5 rounded-lg border border-primary/20">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 mb-2">
+                <span className="text-xs md:text-sm font-medium truncate">{navigation.title.title}</span>
+                <span className="text-xs md:text-sm text-muted-foreground">
+                  {realTitleProgress.percentage}% ({realTitleProgress.completedArticles}/{realTitleProgress.totalArticles})
                 </span>
               </div>
-              <div className="w-full bg-background rounded-full h-2 border">
+              <div className="w-full bg-background rounded-full h-1.5 md:h-2 border">
                 <div
-                  className="bg-primary rounded-full h-2 transition-all duration-300"
+                  className="bg-primary rounded-full h-1.5 md:h-2 transition-all duration-300"
                   style={{ width: `${realTitleProgress.percentage}%` }}
                 ></div>
               </div>
@@ -206,13 +208,13 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
 
           {/* Reading Phase */}
           <Card className="shadow-lg">
-            <CardHeader className="text-center pb-6">
-              <CardTitle className="text-2xl mb-2">Artículo {article.number}</CardTitle>
-              <p className="text-lg text-muted-foreground">{article.title}</p>
+            <CardHeader className="text-center pb-4 md:pb-6 p-4 md:p-6">
+              <CardTitle className="text-xl md:text-2xl mb-2">Artículo {article.number}</CardTitle>
+              <p className="text-base md:text-lg text-muted-foreground">{article.title}</p>
             </CardHeader>
-            <CardContent className="space-y-8">
-              <div className="prose prose-lg max-w-none">
-                <div className="text-lg leading-relaxed text-foreground bg-muted/30 p-6 rounded-lg border-l-4 border-primary">
+            <CardContent className="space-y-6 md:space-y-8 p-4 md:p-6 pt-0">
+              <div className="prose prose-sm md:prose-lg max-w-none">
+                <div className="text-sm md:text-lg leading-relaxed text-foreground bg-muted/30 p-4 md:p-6 rounded-lg border-l-2 md:border-l-4 border-primary">
                   {article.content.split('\n').map((line, index) => (
                     <p key={index} className={line.trim() === '' ? 'mb-4' : 'mb-2'}>
                       {line}
@@ -221,42 +223,49 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                 {/* Navegación anterior */}
-                <div>
+                <div className="order-2 sm:order-1">
                   {navigation?.previous && onNavigateToArticle ? (
                     <Button
                       variant="outline"
                       onClick={() => onNavigateToArticle(navigation.previous!.number)}
-                      className="gap-2"
+                      className="gap-2 w-full sm:w-auto"
+                      size="sm"
                     >
-                      <ArrowLeft className="w-4 h-4" />
-                      Art. {navigation.previous.number}
+                      <ArrowLeft className="w-3 h-3 md:w-4 md:h-4" />
+                      <span className="text-xs md:text-sm">Art. {navigation.previous.number}</span>
                     </Button>
                   ) : (
-                    <div className="w-24" /> // Spacer
+                    <div className="hidden sm:block w-24" /> // Spacer
                   )}
                 </div>
 
                 {/* Botón principal */}
-                <Button size="lg" onClick={handleContinueToQuestion} className="px-8 py-3 text-lg">
-                  {question ? "Continuar a pregunta" : "Marcar completado"}
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                <Button
+                  size="lg"
+                  onClick={handleContinueToQuestion}
+                  className="px-6 md:px-8 py-2 md:py-3 text-base md:text-lg order-1 sm:order-2 w-full sm:w-auto"
+                >
+                  <span className="hidden sm:inline">{question ? "Continuar a pregunta" : "Marcar completado"}</span>
+                  <span className="sm:hidden">{question ? "Continuar" : "Completar"}</span>
+                  <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-2" />
                 </Button>
 
                 {/* Navegación siguiente */}
-                <div>
+                <div className="order-3">
                   {navigation?.next && onNavigateToArticle ? (
                     <Button
                       variant="outline"
                       onClick={() => onNavigateToArticle(navigation.next!.number)}
-                      className="gap-2"
+                      className="gap-2 w-full sm:w-auto"
+                      size="sm"
                     >
-                      Art. {navigation.next.number}
-                      <ArrowRight className="w-4 h-4" />
+                      <span className="text-xs md:text-sm">Art. {navigation.next.number}</span>
+                      <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
                     </Button>
                   ) : (
-                    <div className="w-24" /> // Spacer
+                    <div className="hidden sm:block w-24" /> // Spacer
                   )}
                 </div>
               </div>
@@ -288,13 +297,14 @@ export function StudyFlow({ article, onComplete, onBack, onNavigateToArticle }: 
 
   if (phase === "question" && question) {
     return (
-      <div className="min-h-screen bg-background p-6">
+      <div className="min-h-screen bg-background p-4 md:p-6">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Volver al mapa
+          <div className="flex flex-wrap items-center gap-2 md:gap-4 mb-6 md:mb-8">
+            <Button variant="ghost" size="sm" onClick={onBack} className="gap-1 md:gap-2 text-xs md:text-sm">
+              <ArrowLeft className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="hidden sm:inline">Volver al mapa</span>
+              <span className="sm:hidden">Volver</span>
             </Button>
             <Badge variant="outline" className="gap-2">
               <BookOpen className="w-4 h-4" />

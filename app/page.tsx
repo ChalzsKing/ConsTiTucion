@@ -246,7 +246,7 @@ export default function HomePage() {
     <AuthProvider>
       <div className="flex h-screen bg-background">
         <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-        <main className="flex-1 overflow-auto">{renderContent()}</main>
+        <main className="flex-1 overflow-auto pt-16 md:pt-0">{renderContent()}</main>
       </div>
     </AuthProvider>
   )

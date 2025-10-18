@@ -112,10 +112,10 @@ export function ExamenesView({ onStartExam }: ExamenesViewProps) {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Exámenes</h1>
-        <p className="text-muted-foreground">
+    <div className="p-4 md:p-6 max-w-6xl mx-auto">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Exámenes</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
           Pon a prueba tus conocimientos con exámenes personalizados. Practica por títulos específicos o desafíate con
           un examen general.
         </p>
@@ -128,31 +128,31 @@ export function ExamenesView({ onStartExam }: ExamenesViewProps) {
         <>
           {/* Usage Meter - Solo para usuarios FREE autenticados */}
           {!isPro() && (
-            <div className="mb-6">
+            <div className="mb-4 md:mb-6">
               <UsageMeter />
             </div>
           )}
 
-          <div className="grid gap-8">
+          <div className="grid gap-4 md:gap-8">
             {/* Quick Start */}
             <Card className="shadow-lg bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Play className="w-6 h-6 text-primary" />
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="flex items-center gap-2 md:gap-3 text-lg md:text-xl">
+                  <Play className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                   Examen Rápido
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
+              <CardContent className="space-y-4 p-4 md:p-6 pt-0">
+                <p className="text-sm md:text-base text-muted-foreground">
                   Comienza inmediatamente con un examen general de 20 preguntas aleatorias.
                 </p>
                 <Button
                   size="lg"
                   onClick={handleStartGeneralExam}
-                  className="gap-2"
+                  className="gap-2 w-full md:w-auto text-sm md:text-base"
                   disabled={selectedExamType === 'general'}
                 >
-                  <Globe className="w-5 h-5" />
+                  <Globe className="w-4 h-4 md:w-5 md:h-5" />
                   {selectedExamType === 'general' ? 'Generando preguntas...' : 'Iniciar Examen General'}
                 </Button>
               </CardContent>
@@ -160,18 +160,18 @@ export function ExamenesView({ onStartExam }: ExamenesViewProps) {
 
             {/* Exam by Title */}
             <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <BookOpen className="w-6 h-6 text-primary" />
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="flex items-center gap-2 md:gap-3 text-lg md:text-xl">
+                  <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                   Exámenes por Título
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-6">
+              <CardContent className="p-4 md:p-6 pt-0">
+                <p className="text-sm md:text-base text-muted-foreground mb-4 md:mb-6">
                   Practica sobre títulos específicos de la Constitución. Cada examen incluye 10 preguntas del título
                   seleccionado.
                 </p>
-                <div className="grid gap-4">
+                <div className="grid gap-3 md:gap-4">
                   {constitutionData.map((title) => {
                     const completedArticles = title.articles.filter((a) => a.completed).length
                     const totalArticles = title.articles.length
@@ -184,32 +184,33 @@ export function ExamenesView({ onStartExam }: ExamenesViewProps) {
                         key={title.id}
                         className={`transition-all ${hasQuestions ? "hover:shadow-md cursor-pointer" : "opacity-60"}`}
                       >
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-lg mb-1">{title.title}</h3>
-                              <p className="text-sm text-muted-foreground mb-3">{title.description}</p>
-                              <div className="flex items-center gap-4">
-                                <Badge variant="secondary" className="gap-1">
+                        <CardContent className="p-3 md:p-4">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-base md:text-lg mb-1">{title.title}</h3>
+                              <p className="text-xs md:text-sm text-muted-foreground mb-2 md:mb-3">{title.description}</p>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <Badge variant="secondary" className="gap-1 text-xs">
                                   <Target className="w-3 h-3" />
                                   {totalArticles} artículos
                                 </Badge>
-                                <Badge variant={progress > 0 ? "default" : "outline"}>{progress}% estudiado</Badge>
+                                <Badge variant={progress > 0 ? "default" : "outline"} className="text-xs">{progress}% estudiado</Badge>
                                 {!hasQuestions && (
-                                  <Badge variant="outline" className="text-muted-foreground">
+                                  <Badge variant="outline" className="text-muted-foreground text-xs">
                                     Próximamente
                                   </Badge>
                                 )}
                               </div>
                             </div>
-                            <div className="ml-4">
+                            <div className="w-full md:w-auto md:ml-4">
                               <Button
                                 variant={hasQuestions ? "default" : "ghost"}
                                 disabled={!hasQuestions || selectedExamType === title.id}
                                 onClick={() => hasQuestions && handleStartTitleExam(title.id, title.title)}
-                                className="gap-2"
+                                className="gap-2 w-full md:w-auto text-xs md:text-sm"
+                                size="sm"
                               >
-                                <FileText className="w-4 h-4" />
+                                <FileText className="w-3 h-3 md:w-4 md:h-4" />
                                 {selectedExamType === title.id ? 'Generando...' : hasQuestions ? "Iniciar Examen" : "Próximamente"}
                               </Button>
                             </div>
@@ -224,19 +225,19 @@ export function ExamenesView({ onStartExam }: ExamenesViewProps) {
 
             {/* Exam History Preview */}
             <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Trophy className="w-6 h-6 text-primary" />
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="flex items-center gap-2 md:gap-3 text-lg md:text-xl">
+                  <Trophy className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                   Historial de Exámenes
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Trophy className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
+              <CardContent className="p-4 md:p-6 pt-0">
+                <div className="text-center py-6 md:py-8">
+                  <Trophy className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground mx-auto mb-3 md:mb-4" />
+                  <p className="text-sm md:text-base text-muted-foreground">
                     Aquí aparecerán tus exámenes completados con sus puntuaciones y estadísticas.
                   </p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-xs md:text-sm text-muted-foreground mt-2">
                     ¡Completa tu primer examen para comenzar tu historial!
                   </p>
                 </div>

@@ -15,6 +15,11 @@ export const metadata: Metadata = {
   description:
     "Aplicación para opositores que convierte el estudio de la Constitución Española en una experiencia dinámica",
   generator: "v0.app",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
 }
 
 export default function RootLayout({

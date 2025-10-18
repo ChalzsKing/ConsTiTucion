@@ -76,25 +76,25 @@ export function StatsDashboard() {
   const currentStreak = getStudyStreak()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 p-4 md:p-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">📊 Estadísticas</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold">📊 Estadísticas</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Tu progreso en el estudio de la Constitución Española
           </p>
         </div>
         <div className="flex space-x-2">
           <DataExportDialog>
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Exportar
+            <Button variant="outline" size="sm" className="text-xs md:text-sm">
+              <Download className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
+              <span className="hidden md:inline">Exportar</span>
             </Button>
           </DataExportDialog>
-          <Button onClick={refreshData} variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Actualizar
+          <Button onClick={refreshData} variant="outline" size="sm" className="text-xs md:text-sm">
+            <RefreshCw className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
+            <span className="hidden md:inline">Actualizar</span>
           </Button>
         </div>
       </div>
@@ -130,12 +130,12 @@ export function StatsDashboard() {
 
       {/* Tabs de Contenido */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">Resumen</TabsTrigger>
-          <TabsTrigger value="charts">Gráficos</TabsTrigger>
-          <TabsTrigger value="progress">Progreso</TabsTrigger>
-          <TabsTrigger value="exams">Exámenes</TabsTrigger>
-          <TabsTrigger value="activity">Actividad</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-1">
+          <TabsTrigger value="overview" className="text-xs md:text-sm">Resumen</TabsTrigger>
+          <TabsTrigger value="charts" className="text-xs md:text-sm">Gráficos</TabsTrigger>
+          <TabsTrigger value="progress" className="text-xs md:text-sm">Progreso</TabsTrigger>
+          <TabsTrigger value="exams" className="text-xs md:text-sm">Exámenes</TabsTrigger>
+          <TabsTrigger value="activity" className="text-xs md:text-sm col-span-2 md:col-span-1">Actividad</TabsTrigger>
         </TabsList>
 
         {/* Tab: Resumen */}
@@ -271,21 +271,21 @@ function MetricCard({ title, value, total, icon: Icon, color }: MetricCardProps)
 
   return (
     <Card>
-      <CardContent className="p-6">
+      <CardContent className="p-4 md:p-6">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs md:text-sm font-medium text-muted-foreground truncate">{title}</p>
+            <p className="text-xl md:text-2xl font-bold">
               {value}
-              {total && <span className="text-sm text-muted-foreground"> / {total}</span>}
+              {total && <span className="text-xs md:text-sm text-muted-foreground"> / {total}</span>}
             </p>
             {percentage !== null && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 {percentage}% completado
               </p>
             )}
           </div>
-          <Icon className={`h-8 w-8 ${colorClasses[color]}`} />
+          <Icon className={`h-6 w-6 md:h-8 md:w-8 ${colorClasses[color]} flex-shrink-0`} />
         </div>
         {percentage !== null && (
           <Progress value={percentage} className="mt-2" />
