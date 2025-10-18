@@ -231,6 +231,7 @@ function ExamPerformanceChart({ examHistory }: { examHistory: any[] }) {
         callbacks: {
           label: function(context: any) {
             const exam = recentExams[context.dataIndex]
+            if (!exam) return ''
             return [
               `Puntuación: ${context.parsed.y}%`,
               `Correctas: ${exam.correct_answers}/${exam.total_questions}`,
@@ -341,6 +342,7 @@ function TitlesProgressChart({ userProgress }: { userProgress: any[] }) {
         callbacks: {
           label: function(context: any) {
             const title = progressByTitle[context.dataIndex]
+            if (!title) return ''
             if (context.datasetIndex === 0) {
               return `Completados: ${context.parsed.y} (${title.percentage}%)`
             } else {
@@ -443,6 +445,7 @@ function StudyTimeDistribution({ userProgress }: { userProgress: any[] }) {
         callbacks: {
           label: function(context: any) {
             const title = timeByTitle[context.dataIndex]
+            if (!title) return ''
             return [
               `Tiempo: ${title.totalHours}h`,
               `Minutos: ${title.totalMinutes}`

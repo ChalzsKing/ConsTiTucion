@@ -111,10 +111,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithProvider = async (provider: 'google' | 'github') => {
     setLoading(true)
     try {
+      // Usar variable de entorno si está disponible, sino usar window.location.origin
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `${baseUrl}/auth/callback`
         }
       })
       return { error }
@@ -128,8 +131,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Recuperar contraseña
   const resetPassword = async (email: string) => {
     try {
+      // Usar variable de entorno si está disponible, sino usar window.location.origin
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`
+        redirectTo: `${baseUrl}/auth/reset-password`
       })
       return { error }
     } catch (error) {
